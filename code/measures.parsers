@@ -152,7 +152,7 @@ abstractComputedIntMeasureParser
   computeValue(concept, measureName, parsedProgram, concepts) {
     if (!parsedProgram.measureComputer) {
       const path = require("path")
-      const {MeasureComputer} = require(path.join(path.dirname(parsedProgram.file.filePath).replace("/concepts",""), "Computer.js"))
+      const {MeasureComputer} = require(path.join(path.dirname(parsedProgram.file.filePath).replace(/[\/\\]concepts$/, ""), "Computer.js"))
       parsedProgram.measureComputer = new MeasureComputer(concepts)
     }
     return parsedProgram.measureComputer.get(measureName, concept)

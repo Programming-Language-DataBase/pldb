@@ -560,7 +560,7 @@ Wayback Machine: https://web.archive.org/web/20220000000000*/${title}`
 
   makeATag(id) {
     const file = this.tables.getConceptPage(id)
-    if (!file) throw new Error(`Cant find file '${id}'`)
+    if (!file) return `<a href="../concepts/${id}.html">${id}</a>` // Placeholder for missing files during bootstrap
     return `<a href="${file.permalink}">${file.name}</a>`
   }
 
@@ -1618,7 +1618,9 @@ class Tables {
     if (absolutePath.endsWith("conceptPage.scroll")) return ""
     const name = path.basename(absolutePath).replace(".scroll", "")
     try {
-      return this.getConceptPage(name).toScroll()
+      const concept = this.getConceptPage(name)
+      if (!concept) return "" // Handle missing concept gracefully during bootstrap
+      return concept.toScroll()
     } catch (err) {
       console.error(err)
       console.error(`Error loading '${name}' in '${absolutePath}'`)
@@ -1627,7 +1629,11 @@ class Tables {
   }
 
   get measures() {
-    return require("./measures.json")
+    try {
+      return require("./measures.json")
+    } catch (err) {
+      return [] // Return empty array during bootstrap when measures.json doesn't exist
+    }
   }
 
   get featuresMap() {
@@ -1648,6 +1654,8 @@ class Tables {
         }
         return feature
       })
+
+    if (features.length === 0) return features // Handle empty features during bootstrap
 
     let previous = features[features.length - 1]
     features.forEach((feature, index) => {
