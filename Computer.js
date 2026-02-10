@@ -444,7 +444,7 @@ Wayback Machine: https://web.archive.org/web/20220000000000*/${title}`
 
     this.particle.findParticles("leachim6").forEach(particle => {
       examples.push({
-        code: particle.getParticle("example").subparticlesToString(),
+        code: particle.getParticle("example")?.subparticlesToString(),
         source: "hello-world",
         link: `https://github.com/leachim6/hello-world/blob/main/` + particle.get("filepath")
       })
