@@ -35,6 +35,7 @@ subreddit https://www.reddit.com/r/Oberon
  memberCount
   2022 289
 leachim6 Oberon
+antlr https://github.com/antlr/grammars-v4/tree/master/oberon
  filepath o/Oberon.o
  fileExtensions o
  example
