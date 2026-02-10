@@ -118,7 +118,7 @@ cat > "$MAINTENANCE_DIR/index.html" << 'MAINTEOF'
 </body>
 </html>
 MAINTEOF
-npx serve "$MAINTENANCE_DIR" -l 80 &
+npx serve "$MAINTENANCE_DIR" -l 80 --single &
 MAINT_PID=$!
 echo "    Maintenance server running (PID $MAINT_PID)"
 
