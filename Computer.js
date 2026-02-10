@@ -444,7 +444,7 @@ Wayback Machine: https://web.archive.org/web/20220000000000*/${title}`
 
     this.particle.findParticles("leachim6").forEach(particle => {
       examples.push({
-        code: particle.getParticle("example")?.subparticlesToString(),
+        code: particle.getParticle("example")?.subparticlesToString() || "",
         source: "hello-world",
         link: `https://github.com/leachim6/hello-world/blob/main/` + particle.get("filepath")
       })
@@ -2067,7 +2067,7 @@ class MeasureComputer {
       const conceptId = concept.get("id")
       const writtenIn = concept.get("writtenIn")
       if (!writtenIn) return
-      writtenIn.split(" ").forEach(id => writtenInCache[id].push(conceptId))
+      writtenIn.split(" ").forEach(id => writtenInCache[id]?.push(conceptId))
     })
     return writtenInCache
   }
@@ -2085,7 +2085,7 @@ class MeasureComputer {
         .forEach(particle => {
           const links = particle.content.split(" ")
           links.forEach(link => {
-            if (!inboundLinks[link]) throw new Error(`No file "${link}" found in "${id}"`)
+            if (!inboundLinks[link]) return
 
             inboundLinks[link].push(id)
           })
