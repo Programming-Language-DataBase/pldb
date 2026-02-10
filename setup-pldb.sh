@@ -68,6 +68,60 @@ fi
 echo ">>> Node.js version: $(node --version)"
 echo ">>> npm version: $(npm --version)"
 
+# Stop existing PLDB service if running
+echo ">>> Stopping existing PLDB service (if any)..."
+systemctl stop pldb 2>/dev/null || true
+
+# Serve a maintenance page while we rebuild
+echo ">>> Setting up maintenance page on port 80..."
+MAINTENANCE_DIR=$(mktemp -d)
+cat > "$MAINTENANCE_DIR/index.html" << 'MAINTEOF'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLDB - Maintenance</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+    .container { text-align: center; padding: 2rem; }
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    p { font-size: 1.2rem; color: #666; }
+    .spinner {
+      margin: 2rem auto;
+      width: 40px;
+      height: 40px;
+      border: 4px solid #ddd;
+      border-top-color: #333;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+  <meta http-equiv="refresh" content="10">
+</head>
+<body>
+  <div class="container">
+    <h1>PLDB</h1>
+    <div class="spinner"></div>
+    <p>Down for maintenance. This page will refresh automatically.</p>
+  </div>
+</body>
+</html>
+MAINTEOF
+npx serve "$MAINTENANCE_DIR" -l 80 &
+MAINT_PID=$!
+echo "    Maintenance server running (PID $MAINT_PID)"
+
 # Clone repository
 echo ">>> Setting up PLDB repository..."
 INSTALL_DIR="/root/pldb"
@@ -85,6 +139,12 @@ npm install
 echo ">>> Building the site (this takes a while on low-memory systems)..."
 export NODE_OPTIONS='--max-old-space-size=1536'
 npm run build
+
+# Stop maintenance server and clean up
+echo ">>> Stopping maintenance server..."
+kill $MAINT_PID 2>/dev/null || true
+wait $MAINT_PID 2>/dev/null || true
+rm -rf "$MAINTENANCE_DIR"
 
 # Create systemd service for automatic startup on reboot
 echo ">>> Creating systemd service..."
