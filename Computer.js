@@ -1583,7 +1583,13 @@ class Tables {
     return this._top
   }
 
-  pldb = require("./pldb.json")
+  get pldb() {
+    try {
+      return require("./pldb.json")
+    } catch (err) {
+      return [] // Return empty array during bootstrap when pldb.json doesn't exist
+    }
+  }
 
   _getFileAtRank(rank, ranks) {
     rank = rank - 1

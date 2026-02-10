@@ -10,7 +10,7 @@
  *   --serve: Start a local server after building
  */
 
-const { execSync } = require('child_process')
+const { execSync, spawn } = require('child_process')
 const path = require('path')
 const fs = require('fs')
 
@@ -133,21 +133,85 @@ function patchScrollCliIfNeeded() {
   }
 }
 
-function serve() {
-  console.log('\n🌐 Starting local server...')
-  console.log('   Open http://localhost:3000 in your browser')
-  console.log('   Press Ctrl+C to stop\n')
-  run('npx serve .')
+function writeMaintenancePage() {
+  const maintenanceHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLDB - Building...</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+    .container { text-align: center; padding: 2rem; }
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    p { font-size: 1.2rem; color: #666; }
+    .spinner {
+      margin: 2rem auto;
+      width: 40px;
+      height: 40px;
+      border: 4px solid #ddd;
+      border-top-color: #333;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+  <meta http-equiv="refresh" content="10">
+</head>
+<body>
+  <div class="container">
+    <h1>PLDB</h1>
+    <div class="spinner"></div>
+    <p>Site is rebuilding. This page will refresh automatically.</p>
+  </div>
+</body>
+</html>`
+  fs.writeFileSync(path.join(ROOT, 'index.html'), maintenanceHtml)
+  console.log('  Wrote maintenance page to index.html')
+}
+
+function startBackgroundServer() {
+  console.log('  Starting background server on http://localhost:3000 ...')
+  const serverProcess = spawn('npx', ['serve', '.'], {
+    cwd: ROOT,
+    stdio: 'ignore',
+    shell: true
+  })
+  return serverProcess
 }
 
 // Main
 const args = process.argv.slice(2)
 const shouldServe = args.includes('--serve') || args.includes('-s')
 
+let serverProcess = null
+
+if (shouldServe) {
+  console.log('\n🌐 Setting up maintenance page before build...')
+  writeMaintenancePage()
+  serverProcess = startBackgroundServer()
+}
+
 build()
   .then(() => {
     if (shouldServe) {
-      serve()
+      console.log('\n🌐 Server is running at http://localhost:3000')
+      console.log('   Build complete - server is now serving the real site')
+      console.log('   Press Ctrl+C to stop\n')
+      process.on('SIGINT', () => {
+        console.log('\n🛑 Shutting down server...')
+        if (serverProcess) serverProcess.kill()
+        process.exit(0)
+      })
     } else {
       console.log('\n💡 To start a local server, run: npm run serve')
       console.log('   Or: node build.js --serve')
@@ -155,5 +219,6 @@ build()
   })
   .catch(err => {
     console.error('\n❌ Build failed:', err.message)
+    if (serverProcess) serverProcess.kill()
     process.exit(1)
   })
