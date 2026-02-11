@@ -145,6 +145,56 @@ Contributions are welcome! PLDB is designed for two main audiences:
 
 This project is dedicated to the public domain. When using PLDB, we appreciate attribution but it's not required. All sources are listed at [pldb.io/pages/acknowledgements.html](https://pldb.io/pages/acknowledgements.html).
 
+## 🚢 Making Changes and Deploying
+
+### 1. Make your changes locally
+
+Edit the ScrollSet files in `concepts/`, update parsers in `code/measures.parsers`, or modify any other source files.
+
+### 2. Push to main
+
+When you push to the `main` branch, a GitHub Actions workflow automatically:
+- Installs dependencies and builds the site
+- Packages the built site into `site.tar.gz`
+- Publishes it as a GitHub Release tagged `latest`
+
+The build takes about 2 minutes on GitHub's runners.
+
+### 3. Deploy to server
+
+The `setup-pldb.sh` script deploys the pre-built site to a fresh Ubuntu server (tested on Ubuntu 24.04). It downloads the build artifact from GitHub Releases, so no building happens on the server.
+
+**Requirements:**
+- A fresh Ubuntu server with SSH access as root
+- SSH key authentication configured
+- A successful GitHub Actions build (the `latest` release must exist)
+
+```bash
+./setup-pldb.sh <ip-address> <repo-url>
+# Example:
+./setup-pldb.sh 159.65.99.188 https://github.com/kaby76/pldb.git
+```
+
+The script will:
+- Install Node.js 20.x
+- Show a maintenance page while deploying
+- Download the pre-built site from GitHub Releases
+- Configure a systemd service (`pldb`) to serve the site on port 80
+- Start the server automatically on boot
+
+### Managing the server
+
+```bash
+systemctl status pldb    # Check status
+systemctl restart pldb   # Restart server
+systemctl stop pldb      # Stop server
+journalctl -u pldb -f    # View logs
+```
+
+### Redeploying after changes
+
+After pushing new changes to `main`, wait for the GitHub Actions build to complete, then re-run `setup-pldb.sh` to deploy the updated site.
+
 ## 🌐 Mirrors
 
 The primary site is hosted at [pldb.io](https://pldb.io) via ScrollHub. For offline access or redundancy, you can clone the repository and build locally:

@@ -37,12 +37,26 @@ code
  # After you make changes and before you commit make sure to run:
  npm run format
 
-## To deploy to a server
-The `setup-pldb.sh` script automates deployment to a fresh Ubuntu server (tested on Ubuntu 24.04). It installs Node.js, creates swap space for low-memory systems, builds the site, and configures a systemd service for automatic startup on reboot.
+## Making changes and deploying
+
+### 1. Make your changes locally
+Edit the ScrollSet files in `concepts/`, update parsers in `code/measures.parsers`, or modify any other source files.
+
+### 2. Push to main
+When you push to the `main` branch, a GitHub Actions workflow automatically:
+- Installs dependencies and builds the site
+- Packages the built site into `site.tar.gz`
+- Publishes it as a GitHub Release tagged `latest`
+
+The build takes about 2 minutes on GitHub's runners.
+
+### 3. Deploy to server
+The `setup-pldb.sh` script deploys the pre-built site to a fresh Ubuntu server (tested on Ubuntu 24.04). It downloads the build artifact from GitHub Releases, so no building happens on the server.
 
 Requirements:
 - A fresh Ubuntu server with SSH access as root
 - SSH key authentication configured
+- A successful GitHub Actions build (the `latest` release must exist)
 
 code
  ./setup-pldb.sh <ip-address> <repo-url>
@@ -51,17 +65,21 @@ code
 
 The script will:
 - Install Node.js 20.x
-- Create 2GB swap space (needed for low-memory VPS instances)
-- Clone and build the repository
-- Configure a systemd service (`pldb`) to run on port 80
+- Show a maintenance page while deploying
+- Download the pre-built site from GitHub Releases
+- Configure a systemd service (`pldb`) to serve the site on port 80
 - Start the server automatically on boot
 
+### Managing the server
 After deployment, manage the server with:
 code
  systemctl status pldb    # Check status
  systemctl restart pldb   # Restart server
  systemctl stop pldb      # Stop server
  journalctl -u pldb -f    # View logs
+
+### Redeploying after changes
+After pushing new changes to `main`, wait for the GitHub Actions build to complete, then re-run `setup-pldb.sh` to deploy the updated site.
 
 ## To explore this repo
 The most important folder is `concepts`, which contains the ScrollSet (a file for each concept). The file `code/measures.parsers` contains the Parsers (schema) for the ScrollSet.
