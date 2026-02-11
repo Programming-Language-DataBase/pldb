@@ -1,6 +1,6 @@
 baseUrl http://pldb.info/books/
 buildConcepts books.json books.tsv books.csv
-editBaseUrl /edit.html?folderName=pldb.io&fileName=books/
+editBaseUrl /edit.html?folderName=pldb.info&fileName=books/
 permalink index.html
 title Books for Programmers
 replace BASE_URL ..

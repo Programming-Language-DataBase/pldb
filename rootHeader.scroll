@@ -1,5 +1,5 @@
 importOnly
-editBaseUrl /edit.html?folderName=pldb.io&fileName=
+editBaseUrl /edit.html?folderName=pldb.info&fileName=
 replace BASE_URL .
 tags All
 

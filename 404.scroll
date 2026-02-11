@@ -1,5 +1,5 @@
 buildHtml
-editBaseUrl /edit.html?folderName=pldb.io&fileName=
+editBaseUrl /edit.html?folderName=pldb.info&fileName=
 replace BASE_URL
 title Page not found
 
