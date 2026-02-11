@@ -129,10 +129,12 @@ cd "$INSTALL_DIR"
 echo ">>> Installing serve..."
 npm install --production
 
-# Stop maintenance server and clean up
+# Stop maintenance server and all its child processes, then clean up
 echo ">>> Stopping maintenance server..."
-kill $MAINT_PID 2>/dev/null || true
-wait $MAINT_PID 2>/dev/null || true
+kill -- -$MAINT_PID 2>/dev/null || kill $MAINT_PID 2>/dev/null || true
+# Also kill any serve process still on port 80
+fuser -k 80/tcp 2>/dev/null || true
+sleep 1
 rm -rf "$MAINTENANCE_DIR"
 
 # Create systemd service for automatic startup on reboot
