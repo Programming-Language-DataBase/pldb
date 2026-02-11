@@ -127,7 +127,7 @@ rm /tmp/site.tar.gz
 cd "$INSTALL_DIR"
 
 echo ">>> Installing serve..."
-npm install --production
+npm install
 
 # Stop maintenance server and all its child processes, then clean up
 echo ">>> Stopping maintenance server..."
