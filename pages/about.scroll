@@ -44,7 +44,7 @@ Below are the cloc stats for the pldb repo as of BUILT_ON_DAY.
 bash cd ..; cloc --quiet --vcs git . --read-lang-def=code/clocLangs.txt
 
 # Mirrors
-The URL for the official PLDB site is https://pldb.io. DNS will take that domain name and send your browser an IPv4 address. Your browser will send a request to that address which will reach a DigitalOcean server running ScrollHub. That server will send you the HTML, CSS, Javascript, PNGs, SVGs and JSON that make up the built website.
+The URL for the official PLDB site is http://pldb.info. DNS will take that domain name and send your browser an IPv4 address. Your browser will send a request to that address which will reach a DigitalOcean server running ScrollHub. That server will send you the HTML, CSS, Javascript, PNGs, SVGs and JSON that make up the built website.
  ../concepts/url.html URL
  ../concepts/dns.html DNS
  ../concepts/ipv4.html IPv4

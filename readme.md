@@ -2,7 +2,7 @@
 
 [![Build and Release](https://github.com/kaby76/pldb/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/kaby76/pldb/actions/workflows/build.yml)
 
-PLDB is a comprehensive public domain database containing over 135,000 facts about more than 5,000 programming languages. The project includes both the complete dataset and the website code for [pldb.io](https://pldb.io).
+PLDB is a comprehensive public domain database containing over 135,000 facts about more than 5,000 programming languages. The project includes both the complete dataset and the website code for [pldb.io](http://pldb.info).
 
 ## 🌟 Key Features
 
@@ -10,17 +10,17 @@ PLDB is a comprehensive public domain database containing over 135,000 facts abo
 - **Multiple Export Formats**: Access the complete dataset in CSV, TSV, or JSON format
 - **Public Domain**: All data and code is freely available for any use
 - **Regular Updates**: Actively maintained with version control and release notes
-- **Web Interface**: Browse the data through an intuitive web interface at [pldb.io](https://pldb.io)
+- **Web Interface**: Browse the data through an intuitive web interface at [pldb.io](http://pldb.info)
 
 ## 📊 Data Downloads
 
 Access the complete dataset in your preferred format:
 
-- **CSV**: [pldb.io/pldb.csv](https://pldb.io/pldb.csv)
-- **TSV**: [pldb.io/pldb.tsv](https://pldb.io/pldb.tsv)
-- **JSON**: [pldb.io/pldb.json](https://pldb.io/pldb.json)
+- **CSV**: [pldb.io/pldb.csv](http://pldb.info/pldb.csv)
+- **TSV**: [pldb.io/pldb.tsv](http://pldb.info/pldb.tsv)
+- **JSON**: [pldb.io/pldb.json](http://pldb.info/pldb.json)
 
-Full documentation for the data formats is available at [pldb.io/csv.html](https://pldb.io/csv.html)
+Full documentation for the data formats is available at [pldb.io/csv.html](http://pldb.info/csv.html)
 
 ## 🚀 Local Development
 
@@ -106,7 +106,7 @@ The most important components of the repository:
 
 - `concepts/`: Contains the ScrollSet (individual files for each concept)
 - `code/measures.parsers`: Contains the Parsers (schema) for the ScrollSet
-- View detailed language statistics at [pldb.io/pages/about.html](https://pldb.io/pages/about.html)
+- View detailed language statistics at [pldb.io/pages/about.html](http://pldb.info/pages/about.html)
 
 ## 🏆 Rankings
 
@@ -118,7 +118,7 @@ PLDB includes a sophisticated ranking system for programming languages based on 
 - Language influence
 - Available measurements
 
-Learn more about the ranking algorithm at [pldb.io/pages/the-rankings-algorithm.html](https://pldb.io/pages/the-rankings-algorithm.html)
+Learn more about the ranking algorithm at [pldb.io/pages/the-rankings-algorithm.html](http://pldb.info/pages/the-rankings-algorithm.html)
 
 ## 📜 Version History
 
@@ -126,7 +126,7 @@ Latest major releases:
 
 - **9.0.0** (May 2024): Migrated to Scroll 84
 - **8.0.0** (March 2023): Upgraded to TrueBase 9
-- See [Release Notes](https://pldb.io/releaseNotes.html) for complete history
+- See [Release Notes](http://pldb.info/releaseNotes.html) for complete history
 
 ## 🤝 Contributing
 
@@ -137,13 +137,13 @@ Contributions are welcome! PLDB is designed for two main audiences:
 
 ## 📚 Resources
 
-- **Main Website**: [pldb.io](https://pldb.io)
-- **About Page**: [pldb.io/pages/about.html](https://pldb.io/pages/about.html)
-- **Acknowledgements**: [pldb.io/pages/acknowledgements.html](https://pldb.io/pages/acknowledgements.html)
+- **Main Website**: [pldb.io](http://pldb.info)
+- **About Page**: [pldb.io/pages/about.html](http://pldb.info/pages/about.html)
+- **Acknowledgements**: [pldb.io/pages/acknowledgements.html](http://pldb.info/pages/acknowledgements.html)
 
 ## 📖 Citation
 
-This project is dedicated to the public domain. When using PLDB, we appreciate attribution but it's not required. All sources are listed at [pldb.io/pages/acknowledgements.html](https://pldb.io/pages/acknowledgements.html).
+This project is dedicated to the public domain. When using PLDB, we appreciate attribution but it's not required. All sources are listed at [pldb.io/pages/acknowledgements.html](http://pldb.info/pages/acknowledgements.html).
 
 ## 🚢 Making Changes and Deploying
 
@@ -197,7 +197,7 @@ After pushing new changes to `main`, wait for the GitHub Actions build to comple
 
 ## 🌐 Mirrors
 
-The primary site is hosted at [pldb.io](https://pldb.io) via ScrollHub. For offline access or redundancy, you can clone the repository and build locally:
+The primary site is hosted at [pldb.io](http://pldb.info) via ScrollHub. For offline access or redundancy, you can clone the repository and build locally:
 
 ```bash
 git clone https://github.com/breck7/pldb.git

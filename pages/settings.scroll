@@ -1,4 +1,4 @@
 importOnly
-baseUrl https://pldb.io/pages/
+baseUrl http://pldb.info/pages/
 editBaseUrl /edit.html?folderName=pldb.io&fileName=pages/
 replace BASE_URL ..

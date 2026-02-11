@@ -9,19 +9,19 @@ printTitle
 wideColumns 1
 
 #### View this readme as HTML
- https://pldb.io/readme.html
+ http://pldb.info/readme.html
 
 code/ciBadges.scroll
 
 PLDB is a public domain ScrollSet and website containing over 135,000 facts about over 5,000 programming languages.
 
-This repo contains the entire ScrollSet, code, and website for https://pldb.io.
+This repo contains the entire ScrollSet, code, and website for http://pldb.info.
 
 ## To download the data
-The entire ScrollSet is ready to analyze in popular formats. Full documentation is here: https://pldb.io/csv.html
-- As CSV: https://pldb.io/pldb.csv
-- As TSV: https://pldb.io/pldb.tsv
-- As JSON: https://pldb.io/pldb.json
+The entire ScrollSet is ready to analyze in popular formats. Full documentation is here: http://pldb.info/csv.html
+- As CSV: http://pldb.info/pldb.csv
+- As TSV: http://pldb.info/pldb.tsv
+- As JSON: http://pldb.info/pldb.json
 
 ## To build the site locally
 code
@@ -83,11 +83,11 @@ After pushing new changes to `main`, wait for the GitHub Actions build to comple
 
 ## To explore this repo
 The most important folder is `concepts`, which contains the ScrollSet (a file for each concept). The file `code/measures.parsers` contains the Parsers (schema) for the ScrollSet.
-You can see the `cloc` language stats on this repo at https://pldb.io/pages/about.html.
+You can see the `cloc` language stats on this repo at http://pldb.info/pages/about.html.
 
 citation.scroll
 
-All sources for PLDB can be found here: https://pldb.io/pages/acknowledgements.html
+All sources for PLDB can be found here: http://pldb.info/pages/acknowledgements.html
 
 endColumns
 

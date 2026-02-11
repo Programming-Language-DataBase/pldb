@@ -1,4 +1,4 @@
-baseUrl https://pldb.io/books/
+baseUrl http://pldb.info/books/
 buildConcepts books.json books.tsv books.csv
 editBaseUrl /edit.html?folderName=pldb.io&fileName=books/
 permalink index.html
