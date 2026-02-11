@@ -1,0 +1,39 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build site
+        run: node --max-old-space-size=4096 build.js
+
+      - name: Create tarball
+        run: tar czf site.tar.gz --exclude='.git' --exclude='node_modules' --exclude='ignore' .
+
+      - name: Delete existing latest release
+        run: gh release delete latest --yes 2>/dev/null || true
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Create latest release
+        run: gh release create latest site.tar.gz --title "Latest Build" --notes "Auto-built from ${{ github.sha }}"
+        env:
+          GH_TOKEN: ${{ github.token }}

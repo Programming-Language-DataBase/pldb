@@ -4,8 +4,8 @@
 #
 # This script:
 # 1. Installs Node.js 20.x if not present
-# 2. Creates swap space (needed for low-memory droplets)
-# 3. Clones and builds the PLDB repository
+# 2. Downloads pre-built site from GitHub Releases
+# 3. Installs serve for hosting
 # 4. Creates a systemd service for automatic startup on reboot
 # 5. Starts the server and verifies it is accessible
 
@@ -42,21 +42,6 @@ apt-get update -qq
 echo ">>> Installing prerequisites..."
 apt-get install -y -qq curl
 
-# Setup swap if not already present (needed for low-memory droplets)
-echo ">>> Checking swap space..."
-if [ $(swapon --show | wc -l) -eq 0 ]; then
-    echo "    Creating 2GB swap file..."
-    fallocate -l 2G /swapfile
-    chmod 600 /swapfile
-    mkswap /swapfile
-    swapon /swapfile
-    echo '/swapfile none swap sw 0 0' >> /etc/fstab
-    echo "    Swap enabled"
-else
-    echo "    Swap already configured"
-fi
-free -h | grep -E "^(Mem|Swap)"
-
 # Install Node.js if needed
 echo ">>> Checking Node.js..."
 if ! command -v node &> /dev/null; then
@@ -72,7 +57,7 @@ echo ">>> npm version: $(npm --version)"
 echo ">>> Stopping existing PLDB service (if any)..."
 systemctl stop pldb 2>/dev/null || true
 
-# Serve a maintenance page while we rebuild
+# Serve a maintenance page while we deploy
 echo ">>> Setting up maintenance page on port 80..."
 MAINTENANCE_DIR=$(mktemp -d)
 cat > "$MAINTENANCE_DIR/index.html" << 'MAINTEOF'
@@ -122,23 +107,27 @@ npx serve "$MAINTENANCE_DIR" -l 80 --single &
 MAINT_PID=$!
 echo "    Maintenance server running (PID $MAINT_PID)"
 
-# Clone repository
-echo ">>> Setting up PLDB repository..."
+# Download pre-built site from GitHub Releases
+echo ">>> Downloading pre-built site..."
 INSTALL_DIR="/root/pldb"
+RELEASE_URL="${REPO_URL%.git}/releases/download/latest/site.tar.gz"
+echo "    Release URL: $RELEASE_URL"
+
 if [ -d "$INSTALL_DIR" ]; then
     echo "    Removing existing installation..."
     rm -rf "$INSTALL_DIR"
 fi
-git clone "$REPO_URL" "$INSTALL_DIR"
+mkdir -p "$INSTALL_DIR"
+
+curl -fSL "$RELEASE_URL" -o /tmp/site.tar.gz
+echo ">>> Extracting site..."
+tar xzf /tmp/site.tar.gz -C "$INSTALL_DIR"
+rm /tmp/site.tar.gz
+
 cd "$INSTALL_DIR"
 
-echo ">>> Installing npm dependencies..."
-npm install
-
-# Build with increased Node.js memory (required for large site)
-echo ">>> Building the site (this takes a while on low-memory systems)..."
-export NODE_OPTIONS='--max-old-space-size=1536'
-npm run build
+echo ">>> Installing serve..."
+npm install --production
 
 # Stop maintenance server and clean up
 echo ">>> Stopping maintenance server..."
