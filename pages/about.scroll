@@ -28,7 +28,7 @@ All data and source code used to generate this site are on GitHub.
  https://github.com/breck7/pldb GitHub
 
 ## Web server
-PLDB is an entirely static site. PLDB.io is served via ScrollHub. You can clone the source to PLDB and build it locally and use PLDB entirely offline on your own machine.
+PLDB is an entirely static site. PLDB.info is served via ScrollHub. You can clone the source to PLDB and build it locally and use PLDB entirely offline on your own machine.
  https://hub.scroll.pub/ ScrollHub
 
 ## Acknowledgements

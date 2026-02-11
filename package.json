@@ -28,8 +28,8 @@
     "pldb": "./cli.js"
   },
   "bugs": {
-    "url": "https://issues.pldb.io",
-    "email": "bugs@pldb.io"
+    "url": "https://issues.pldb.info",
+    "email": "bugs@pldb.info"
   },
   "repository": {
     "type": "git",
@@ -42,7 +42,7 @@
   "files": [
     "pldb.json"
   ],
-  "homepage": "https://pldb.io",
+  "homepage": "https://pldb.info",
   "devDependencies": {
     "dayjs": "^1.11.7",
     "lodash": "^4.17.21",

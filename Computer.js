@@ -765,7 +765,7 @@ datatable
       : ""
 
     return `../header.scroll
-baseUrl https://pldb.io/concepts/
+baseUrl https://pldb.info/concepts/
 title ${title} - ${lodash.upperFirst(primaryTagName)}
 
 printTitle ${title}
@@ -773,7 +773,7 @@ printTitle ${title}
 <a class="trueBaseThemePreviousItem" href="${this.prevPage}">&lt;</a>
 <a class="trueBaseThemeNextItem" href="${this.nextPage}">&gt;</a>
 
-editBaseUrl /edit.html?folderName=pldb.io&fileName=concepts/
+editBaseUrl /edit.html?folderName=pldb.info&fileName=concepts/
 
 container 800px
 
@@ -835,7 +835,7 @@ endColumns
       caption = `A photo of ${title}.`
     } else image = "screenshots/" + image
 
-    return `openGraphImage https://pldb.io/concepts/${image}
+    return `openGraphImage https://pldb.info/concepts/${image}
 image ${image}
  caption ${caption}`
   }
@@ -898,7 +898,7 @@ image ${image}
       tiktok: this.getPrimary("tiktoks"),
       festival: this.getPrimary("conferences"),
       twitter: this.get("twitter"),
-      edit: `/edit.html?folderName=pldb.io&fileName=concepts%2F${this.id}.scroll`
+      edit: `/edit.html?folderName=pldb.info&fileName=concepts%2F${this.id}.scroll`
     }
     return Object.keys(links)
       .filter(key => links[key])
@@ -1478,7 +1478,7 @@ printTitle ${title}
 <a class="trueBaseThemePreviousItem" href="${previous.permalink}">&lt;</a>
 <a class="trueBaseThemeNextItem" href="${next.permalink}">&gt;</a>
 
-editUrl /edit.html?folderName=pldb.io&fileName=Computer.js
+editUrl /edit.html?folderName=pldb.info&fileName=Computer.js
 
 container 600px
 
