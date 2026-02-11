@@ -1,6 +1,6 @@
 # PLDB - A Programming Language Database
 
-[![Build Status](https://github.com/breck7/pldb/workflows/Tests/badge.svg)](https://github.com/breck7/pldb/actions)
+[![Build and Release](https://github.com/kaby76/pldb/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/kaby76/pldb/actions/workflows/build.yml)
 
 PLDB is a comprehensive public domain database containing over 135,000 facts about more than 5,000 programming languages. The project includes both the complete dataset and the website code for [pldb.io](https://pldb.io).
 
