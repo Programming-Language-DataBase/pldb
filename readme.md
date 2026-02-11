@@ -28,7 +28,7 @@ Full documentation for the data formats is available at [pldb.info/csv.html](htt
 
 ```bash
 # Clone the repository
-git clone https://github.com/breck7/pldb
+git clone https://github.com/kaby76/pldb
 cd pldb
 
 # Install dependencies
@@ -200,7 +200,7 @@ After pushing new changes to `main`, wait for the GitHub Actions build to comple
 The primary site is hosted at [pldb.info](http://pldb.info) via ScrollHub. For offline access or redundancy, you can clone the repository and build locally:
 
 ```bash
-git clone https://github.com/breck7/pldb.git
+git clone https://github.com/kaby76/pldb.git
 cd pldb
 git pull  # To keep updated
 ```
