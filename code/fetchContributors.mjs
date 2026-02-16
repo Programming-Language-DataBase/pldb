@@ -4,7 +4,7 @@
 
 fetchContributors.js
 
-- fetch https://api.github.com/repos/kaby76/pldb/contributors
+- fetch https://api.github.com/repos/Programming-Language-DataBase/pldb/contributors
 - fetch all pagination pages
 - write results as JSON to path.join(__dirname, "..", "pages", "contributors.json")
 - You can use the npm package "ky"
@@ -23,7 +23,7 @@ import { dirname } from "path"
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
-const API_URL = "https://api.github.com/repos/kaby76/pldb/contributors"
+const API_URL = "https://api.github.com/repos/Programming-Language-DataBase/pldb/contributors"
 const OUTPUT_FILE = path.join(__dirname, "..", "pages", "contributors.json")
 
 async function fetchContributors(url, page = 1, allContributors = []) {
