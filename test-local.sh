@@ -82,6 +82,9 @@ rm -rf "$SERVE_DIR" && mkdir -p "$SERVE_DIR"
 echo ">>> Extracting site..."
 tar xzf "$TARBALL" -C "$SERVE_DIR"
 
+echo ">>> Installing dependencies (node_modules)..."
+npm install --prefix "$SERVE_DIR"
+
 echo ""
 echo ">>> Starting server at http://localhost:${PORT}"
 echo "    Press Ctrl+C to stop"
