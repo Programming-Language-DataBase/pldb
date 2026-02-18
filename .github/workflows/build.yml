@@ -30,12 +30,22 @@ jobs:
       - name: Create tarball
         run: tar czf /tmp/site.tar.gz --exclude='.git' --exclude='node_modules' --exclude='ignore' .
 
+      - name: Upload PR artifact
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-pr-${{ github.event.pull_request.number }}
+          path: /tmp/site.tar.gz
+          retention-days: 7
+
       - name: Delete existing latest release
-        run: gh release delete latest --yes 2>/dev/null || true
+        if: github.event_name == 'push'
+        run: gh release delete latest --yes --cleanup-tag || true
         env:
           GH_TOKEN: ${{ github.token }}
 
       - name: Create latest release
+        if: github.event_name == 'push'
         run: gh release create latest /tmp/site.tar.gz --title "Latest Build" --notes "Auto-built from ${{ github.sha }}"
         env:
           GH_TOKEN: ${{ github.token }}
