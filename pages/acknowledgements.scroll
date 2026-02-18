@@ -2,7 +2,7 @@ tags All
 title Acknowledgements
 
 // Currently fetched manually because of pagination.
-// https://api.github.com/repos/breck7/pldb/contributors
+// https://api.github.com/repos/Programming-Language-DataBase/pldb/contributors
 
 header.scroll
 printTitle
@@ -11,8 +11,8 @@ thinColumns
 
 ## Contributors
 Thank you to everyone who has contributed directly to the PLDB repo:
- https://github.com/breck7/pldb PLDB repo
- https://api.github.com/repos/breck7/pldb/contributors everyone
+ https://github.com/Programming-Language-DataBase/pldb PLDB repo
+ https://api.github.com/repos/Programming-Language-DataBase/pldb/contributors everyone
 
 datatable contributors.json
  where login != breck7
