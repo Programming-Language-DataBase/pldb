@@ -17,6 +17,7 @@ features/*.scroll
 *.json
 *.tsv
 *.js
+!clean.js
 *.css
 *.txt
 pldb.parsers
