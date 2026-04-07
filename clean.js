@@ -3,6 +3,11 @@
 const fs = require("fs")
 const path = require("path")
 
+if (!fs.existsSync(path.join(process.cwd(), "package.json")) || !fs.existsSync(path.join(process.cwd(), "build.js"))) {
+  console.error("Error: clean.js must be run from the top-level repository directory.")
+  process.exit(1)
+}
+
 function rm(p) {
   if (!fs.existsSync(p)) return
   const stat = fs.statSync(p)
