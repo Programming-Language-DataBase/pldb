@@ -20,10 +20,12 @@ const SCROLL_CLI = path.join(ROOT, 'node_modules', 'scroll-cli', 'scroll.js')
 // Build order matters: creators must be before lists
 const SUBFOLDERS = ['blog', 'books', 'concepts', 'creators', 'features', 'lists', 'pages']
 
+const NODE_ENV = { ...process.env, NODE_OPTIONS: '--max-old-space-size=8192' }
+
 function run(cmd, cwd = ROOT) {
   console.log(`\n📂 [${path.basename(cwd)}] Running: ${cmd}`)
   try {
-    execSync(cmd, { cwd, stdio: 'inherit' })
+    execSync(cmd, { cwd, stdio: 'inherit', env: NODE_ENV })
   } catch (err) {
     console.error(`❌ Command failed: ${cmd}`)
     throw err
@@ -33,7 +35,7 @@ function run(cmd, cwd = ROOT) {
 function runQuiet(cmd, cwd = ROOT) {
   console.log(`📂 [${path.basename(cwd)}] Running: ${cmd}`)
   try {
-    execSync(cmd, { cwd, stdio: 'pipe' })
+    execSync(cmd, { cwd, stdio: 'pipe', env: NODE_ENV })
   } catch (err) {
     console.error(`❌ Command failed: ${cmd}`)
     throw err
@@ -244,19 +246,19 @@ function patchScrollCliCopyButton() {
 
   const old = (
     'if (!navigator.clipboard) return\\n' +
-    '    const button = document.createElement(\\"span\\")\\n' +
-    '    button.classList.add(\\"scrollCopyButton\\")\\n' +
+    '    const button = document.createElement("span")\\n' +
+    '    button.classList.add("scrollCopyButton")\\n' +
     '    block.appendChild(button)\\n' +
-    '    button.addEventListener(\\"click\\", async () => {\\n' +
+    '    button.addEventListener("click", async () => {\\n' +
     '      await navigator.clipboard.writeText(block.innerText)\\n' +
-    '      button.classList.add(\\"scrollCopiedButton\\")\\n'
+    '      button.classList.add("scrollCopiedButton")\\n'
   )
 
   const patched = (
-    'const button = document.createElement(\\"span\\")\\n' +
-    '    button.classList.add(\\"scrollCopyButton\\")\\n' +
+    'const button = document.createElement("span")\\n' +
+    '    button.classList.add("scrollCopyButton")\\n' +
     '    block.appendChild(button)\\n' +
-    '    button.addEventListener(\\"click\\", async () => {\\n' +
+    '    button.addEventListener("click", async () => {\\n' +
     '      if (navigator.clipboard) {\\n' +
     '        await navigator.clipboard.writeText(block.innerText)\\n' +
     '      } else {\\n' +
@@ -265,10 +267,10 @@ function patchScrollCliCopyButton() {
     '        range.selectNodeContents(block)\\n' +
     '        sel.removeAllRanges()\\n' +
     '        sel.addRange(range)\\n' +
-    '        document.execCommand(\\"copy\\")\\n' +
+    '        document.execCommand("copy")\\n' +
     '        sel.removeAllRanges()\\n' +
     '      }\\n' +
-    '      button.classList.add(\\"scrollCopiedButton\\")\\n'
+    '      button.classList.add("scrollCopiedButton")\\n'
   )
 
   for (const filePath of targets) {
