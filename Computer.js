@@ -1436,12 +1436,12 @@ class Feature {
       : ""
 
     const examples = positives
-      .filter(file => this.tables.getConceptFile(file.id).getParticle(id).length)
+      .filter(file => this.tables.getConceptFile(file.id).getParticle(id)?.length)
       .map(file => {
         return {
           id: file.id,
           name: file.name,
-          example: this.tables.getConceptFile(file.id).getParticle(id).subparticlesToString()
+          example: this.tables.getConceptFile(file.id).getParticle(id)?.subparticlesToString()
         }
       })
     const grouped = lodash.groupBy(examples, "example")
