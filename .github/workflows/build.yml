@@ -11,6 +11,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    concurrency:
+      group: latest-release
+      cancel-in-progress: false
     permissions:
       contents: write
 

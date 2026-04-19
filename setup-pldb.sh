@@ -205,9 +205,10 @@ echo "  View logs:   journalctl -u pldb -f"
 echo "  Restart:     systemctl restart pldb"
 echo "  Stop:        systemctl stop pldb"
 
-# Save repo URL for the weekly updater
-echo ">>> Saving repo URL for weekly updater..."
-echo "$REPO_URL" > /root/pldb-repo.conf
+# Save HTTPS release base URL for the weekly updater (normalize away any git@ or .git suffix)
+echo ">>> Saving release URL for weekly updater..."
+HTTPS_BASE=$(echo "$REPO_URL" | sed 's|git@github.com:|https://github.com/|; s|\.git$||')
+echo "$HTTPS_BASE" > /root/pldb-repo.conf
 
 # Write the weekly update script
 echo ">>> Installing weekly update script..."
@@ -225,7 +226,7 @@ CONFIG_FILE="/root/pldb-repo.conf"
 WORK_DIR="/root/pldb-new"
 
 log() {
-    echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] $*" | tee -a "$LOG"
+    echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] $*" >> "$LOG"
 }
 
 log "=== Starting PLDB weekly update ==="
@@ -234,8 +235,8 @@ if [ ! -f "$CONFIG_FILE" ]; then
     log "ERROR: Config file $CONFIG_FILE not found. Run setup-pldb.sh first."
     exit 1
 fi
-REPO_URL=$(cat "$CONFIG_FILE")
-RELEASE_URL="${REPO_URL%.git}/releases/download/latest/site.tar.gz"
+REPO_BASE=$(cat "$CONFIG_FILE")
+RELEASE_URL="${REPO_BASE}/releases/download/latest/site.tar.gz"
 log "Release URL: $RELEASE_URL"
 
 log "Downloading new release..."
@@ -255,21 +256,31 @@ npm install --quiet
 log "Swapping site directory..."
 OLD_DIR="/root/pldb-old"
 rm -rf "$OLD_DIR"
-mv "$INSTALL_DIR" "$OLD_DIR" 2>/dev/null || true
+if ! mv "$INSTALL_DIR" "$OLD_DIR"; then
+    log "ERROR: Could not back up $INSTALL_DIR to $OLD_DIR. Aborting."
+    exit 1
+fi
 mv "$WORK_DIR" "$INSTALL_DIR"
 
 log "Restarting pldb service..."
-systemctl restart pldb
+if ! systemctl restart pldb; then
+    log "ERROR: Service failed to restart. Rolling back..."
+    rm -rf "$INSTALL_DIR" 2>/dev/null || true
+    mv "$OLD_DIR" "$INSTALL_DIR"
+    systemctl restart pldb || true
+    log "Rollback complete. Check service logs: journalctl -u pldb -n 50"
+    exit 1
+fi
 
 sleep 5
 if systemctl is-active --quiet pldb; then
     log "Service is running. Update complete."
     rm -rf "$OLD_DIR"
 else
-    log "ERROR: Service failed to restart. Rolling back..."
+    log "ERROR: Service not active after restart. Rolling back..."
     rm -rf "$INSTALL_DIR" 2>/dev/null || true
     mv "$OLD_DIR" "$INSTALL_DIR"
-    systemctl restart pldb
+    systemctl restart pldb || true
     log "Rollback complete. Check service logs: journalctl -u pldb -n 50"
     exit 1
 fi
