@@ -1436,14 +1436,13 @@ class Feature {
       : ""
 
     const examples = positives
-      .filter(file => this.tables.getConceptFile(file.id).getParticle(id).length)
-      .map(file => {
-        return {
-          id: file.id,
-          name: file.name,
-          example: this.tables.getConceptFile(file.id).getParticle(id).subparticlesToString()
-        }
-      })
+      .map(file => ({ file, particle: this.tables.getConceptFile(file.id).getParticle(id) }))
+      .filter(({ particle }) => particle?.length)
+      .map(({ file, particle }) => ({
+        id: file.id,
+        name: file.name,
+        example: particle.subparticlesToString()
+      }))
     const grouped = lodash.groupBy(examples, "example")
     const examplesText = Object.values(grouped)
       .map(group => {
