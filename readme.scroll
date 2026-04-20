@@ -25,7 +25,7 @@ The entire ScrollSet is ready to analyze in popular formats. Full documentation 
 
 ## To build the site locally
 code
- git clone https://github.com/breck7/pldb
+ git clone https://github.com/Programming-Language-DataBase/pldb
  cd pldb
  # Required to run this during first install only.
  npm i -g cloc
@@ -61,7 +61,7 @@ Requirements:
 code
  ./setup-pldb.sh <ip-address> <repo-url>
  # Example:
- ./setup-pldb.sh 159.65.99.188 https://github.com/kaby76/pldb.git
+ ./setup-pldb.sh 159.65.99.188 https://github.com/Programming-Language-DataBase/pldb.git
 
 The script will:
 - Install Node.js 20.x

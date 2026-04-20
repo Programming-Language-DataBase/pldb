@@ -6,10 +6,10 @@ printTitle
 thinColumns 1
 
 In addition to being open source, you can download the built html of PLDB and browse the site entirely offline.
- https://github.com/breck7/pldb open source
+ https://github.com/Programming-Language-DataBase/pldb open source
 
 Download PLDB
- https://github.com/breck7/pldb/archive/refs/heads/wws.zip
+ https://github.com/Programming-Language-DataBase/pldb/archive/refs/heads/wws.zip
  class scrollButton
 
 endColumns
