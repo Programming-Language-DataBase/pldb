@@ -159,6 +159,18 @@ async function build() {
     console.warn(`⚠️  Could not fetch TIOBE data (${err.message}), keeping existing topTiobeLangs.scroll`)
   }
 
+  // Step 2.6: Fetch latest PL news and write latestNews.scroll + news.scroll
+  console.log('\n📋 Step 2.6: Fetching latest PL news...')
+  try {
+    const { fetchLatestNews, writeLatestNewsScroll } = require('./code/fetchLatestNews.js')
+    const newsArticles = await fetchLatestNews()
+    const fetchDate = new Date().toISOString().split('T')[0]
+    writeLatestNewsScroll(newsArticles, fetchDate)
+    console.log(`✅ News: ${newsArticles.length} articles indexed`)
+  } catch (err) {
+    console.warn(`⚠️  Could not fetch latest news (${err.message}), keeping existing latestNews.scroll`)
+  }
+
   // Step 3: Build root folder (generates pldb.json, measures.json)
   console.log('\n📋 Step 3: Building root folder...')
   run(`node "${SCROLL_CLI}" build`)
