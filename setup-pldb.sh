@@ -292,7 +292,7 @@ echo "    Update script installed at /root/pldb-update.sh"
 
 # Install weekly cron job (Monday 09:00 UTC)
 echo ">>> Installing weekly cron job..."
-( crontab -l 2>/dev/null | grep -v 'pldb-update'; echo '0 9 * * 1 /root/pldb-update.sh >> /root/pldb-update.log 2>&1' ) | crontab -
+( crontab -l 2>/dev/null | grep -v 'pldb-update' || true; echo '0 9 * * 1 /root/pldb-update.sh >> /root/pldb-update.log 2>&1' ) | crontab -
 echo "    Cron job installed: runs every Monday at 09:00 UTC"
 
 ENDSSH
