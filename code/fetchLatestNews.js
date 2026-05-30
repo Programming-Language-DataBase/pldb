@@ -132,8 +132,9 @@ function extractLinkHref(xml) {
 function parseItems(xml) {
   const items = []
 
-  // RSS 1.0 (RDF) and RSS 2.0 both use <item> elements
-  const rssRe = /<item[^>]*>([\s\S]*?)<\/item>/gi
+  // RSS 1.0 (RDF) and RSS 2.0 both use <item> elements.
+  // Use \b so we don't match <items> (the RSS 1.0 container element).
+  const rssRe = /<item\b[^>]*>([\s\S]*?)<\/item>/gi
   let m
   while ((m = rssRe.exec(xml)) !== null) {
     const raw = m[1]
@@ -196,6 +197,21 @@ async function fetchLambdaUltimate() {
     .map(item => ({ ...item, source: 'Lambda the Ultimate' }))
 }
 
+async function fetchAcm() {
+  // PACMPL = Proceedings of the ACM on Programming Languages (POPL, ICFP, OOPSLA, …)
+  // TOPLAS = ACM Transactions on Programming Languages and Systems
+  const feeds = [
+    'https://dl.acm.org/action/showFeed?type=etoc&feed=rss&jc=PACMPL',
+    'https://dl.acm.org/action/showFeed?type=etoc&feed=rss&jc=TOPLAS',
+  ]
+  const items = []
+  for (const url of feeds) {
+    const xml = await fetchUrl(url)
+    items.push(...parseItems(xml))
+  }
+  return items.map(item => ({ ...item, source: 'ACM DL' }))
+}
+
 async function fetchHackerNews() {
   // Algolia HN search API — recent stories mentioning "programming language"
   const url = 'https://hn.algolia.com/api/v1/search_by_date?tags=story&query=programming+language&hitsPerPage=20'
@@ -217,6 +233,7 @@ async function fetchLatestNews() {
 
   const sources = [
     { name: 'arXiv cs.PL',        fn: fetchArxiv },
+    { name: 'ACM DL',             fn: fetchAcm },
     { name: 'lobste.rs/t/plt',    fn: fetchLobsters },
     { name: 'Lambda the Ultimate', fn: fetchLambdaUltimate },
     { name: 'Hacker News',        fn: fetchHackerNews },
@@ -281,7 +298,7 @@ function writeLatestNewsScroll(articles, fetchDate) {
   fs.writeFileSync(path.join(ROOT, 'latestNews.scroll'), widgetContent)
 
   // ── Full news page ────────────────────────────────────────────────────────
-  const SOURCE_ORDER = ['arXiv cs.PL', 'lobste.rs', 'Lambda the Ultimate', 'Hacker News']
+  const SOURCE_ORDER = ['arXiv cs.PL', 'ACM DL', 'lobste.rs', 'Lambda the Ultimate', 'Hacker News']
   const bySource = {}
   for (const src of SOURCE_ORDER) bySource[src] = []
   for (const a of ordered) {
@@ -293,7 +310,11 @@ function writeLatestNewsScroll(articles, fetchDate) {
   for (const src of [...SOURCE_ORDER, ...Object.keys(bySource).filter(k => !SOURCE_ORDER.includes(k))]) {
     const items = bySource[src]
     if (!items || !items.length) continue
-    const label = src === 'arXiv cs.PL' ? 'Academic Papers (arXiv cs.PL)' : src
+    const LABELS = {
+      'arXiv cs.PL': 'Academic Papers (arXiv cs.PL)',
+      'ACM DL': 'ACM Digital Library (PACMPL &amp; TOPLAS)',
+    }
+    const label = LABELS[src] || src
     sectionsHtml += `\n<h2>${esc(label)}</h2>\n<ul class="pldbNewsFull">\n`
     sectionsHtml += items.map(articleToLi).join('\n')
     sectionsHtml += '\n</ul>\n'
@@ -305,12 +326,12 @@ rootHeader.scroll
 
 # Latest on Programming Languages
 
-<p class="pldbNewsUpdated">Updated: ${fetchDate} &nbsp;·&nbsp; Sources: arXiv cs.PL &nbsp;·&nbsp; lobste.rs/t/plt &nbsp;·&nbsp; Lambda the Ultimate &nbsp;·&nbsp; Hacker News</p>
+<p class="pldbNewsUpdated">Updated: ${fetchDate} &nbsp;·&nbsp; Sources: arXiv cs.PL &nbsp;·&nbsp; ACM Digital Library &nbsp;·&nbsp; lobste.rs/t/plt &nbsp;·&nbsp; Lambda the Ultimate &nbsp;·&nbsp; Hacker News</p>
 ${sectionsHtml}
 footer.scroll
 `
   fs.writeFileSync(path.join(ROOT, 'news.scroll'), newsPageContent)
-  console.log(`  Wrote latestNews.scroll (${homepageItems.length} items) and news.scroll (${ordered.length} items)`)
+  console.log(`  Wrote latestNews.scroll and news.scroll (${ordered.length} items)`)
 }
 
 module.exports = { fetchLatestNews, writeLatestNewsScroll }
