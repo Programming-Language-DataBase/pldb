@@ -212,6 +212,17 @@ async function fetchAcm() {
   return items.map(item => ({ ...item, source: 'ACM DL' }))
 }
 
+async function fetchMedium() {
+  // Both tags often overlap; the deduplication pass in fetchLatestNews() handles that.
+  const tags = ['programming-languages', 'programming-language']
+  const items = []
+  for (const tag of tags) {
+    const xml = await fetchUrl(`https://medium.com/feed/tag/${tag}`)
+    items.push(...parseItems(xml))
+  }
+  return items.map(item => ({ ...item, source: 'Medium' }))
+}
+
 async function fetchHackerNews() {
   // Algolia HN search API — recent stories mentioning "programming language"
   const url = 'https://hn.algolia.com/api/v1/search_by_date?tags=story&query=programming+language&hitsPerPage=20'
@@ -236,6 +247,7 @@ async function fetchLatestNews() {
     { name: 'ACM DL',             fn: fetchAcm },
     { name: 'lobste.rs/t/plt',    fn: fetchLobsters },
     { name: 'Lambda the Ultimate', fn: fetchLambdaUltimate },
+    { name: 'Medium',             fn: fetchMedium },
     { name: 'Hacker News',        fn: fetchHackerNews },
   ]
 
@@ -298,7 +310,7 @@ function writeLatestNewsScroll(articles, fetchDate) {
   fs.writeFileSync(path.join(ROOT, 'latestNews.scroll'), widgetContent)
 
   // ── Full news page ────────────────────────────────────────────────────────
-  const SOURCE_ORDER = ['arXiv cs.PL', 'ACM DL', 'lobste.rs', 'Lambda the Ultimate', 'Hacker News']
+  const SOURCE_ORDER = ['arXiv cs.PL', 'ACM DL', 'lobste.rs', 'Lambda the Ultimate', 'Medium', 'Hacker News']
   const bySource = {}
   for (const src of SOURCE_ORDER) bySource[src] = []
   for (const a of ordered) {
@@ -326,7 +338,7 @@ rootHeader.scroll
 
 # Latest on Programming Languages
 
-<p class="pldbNewsUpdated">Updated: ${fetchDate} &nbsp;·&nbsp; Sources: arXiv cs.PL &nbsp;·&nbsp; ACM Digital Library &nbsp;·&nbsp; lobste.rs/t/plt &nbsp;·&nbsp; Lambda the Ultimate &nbsp;·&nbsp; Hacker News</p>
+<p class="pldbNewsUpdated">Updated: ${fetchDate} &nbsp;·&nbsp; Sources: arXiv cs.PL &nbsp;·&nbsp; ACM Digital Library &nbsp;·&nbsp; lobste.rs/t/plt &nbsp;·&nbsp; Lambda the Ultimate &nbsp;·&nbsp; Medium &nbsp;·&nbsp; Hacker News</p>
 ${sectionsHtml}
 footer.scroll
 `
