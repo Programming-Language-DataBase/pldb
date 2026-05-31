@@ -67,9 +67,25 @@ function detectLanguages(title, abstract) {
   return LANGUAGES.filter(lang => mentionsLanguage(combined, lang))
 }
 
-// ─── HTTP fetch with redirect following ──────────────────────────────────────
+// ─── HTTP fetch with redirect following and retry ────────────────────────────
 
-function fetchUrl(url, timeoutMs = 12000, redirects = 0) {
+async function fetchWithRetry(url, { retries = 5, timeoutMs = 20000, retryDelayMs = 2000 } = {}) {
+  let lastErr
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      return await fetchUrl(url, timeoutMs)
+    } catch (err) {
+      lastErr = err
+      if (attempt < retries) {
+        console.warn(`  ↻ ${url} failed (attempt ${attempt}/${retries}): ${err.message} — retrying in ${retryDelayMs / 1000}s`)
+        await new Promise(r => setTimeout(r, retryDelayMs))
+      }
+    }
+  }
+  throw lastErr
+}
+
+function fetchUrl(url, timeoutMs = 20000, redirects = 0) {
   return new Promise((resolve, reject) => {
     if (redirects > 5) return reject(new Error('Too many redirects'))
     const mod = url.startsWith('https') ? https : http
@@ -174,7 +190,7 @@ async function fetchArxiv() {
   // Use the arXiv API (Atom) rather than the RSS feed, which is empty on weekends.
   // cs.PL = Programming Languages — all papers are PL-related by category.
   const url = 'https://export.arxiv.org/api/query?search_query=cat:cs.PL&start=0&max_results=40&sortBy=submittedDate&sortOrder=descending'
-  const xml = await fetchUrl(url)
+  const xml = await fetchWithRetry(url)
   return parseItems(xml).map(item => ({
     ...item,
     // The API id URL is the canonical link; link field may have it already
@@ -184,32 +200,72 @@ async function fetchArxiv() {
 }
 
 async function fetchLobsters() {
-  const xml = await fetchUrl('https://lobste.rs/t/plt.rss')
+  const xml = await fetchWithRetry('https://lobste.rs/t/plt.rss')
   return parseItems(xml)
     .slice(0, 20)
     .map(item => ({ ...item, source: 'lobste.rs' }))
 }
 
 async function fetchLambdaUltimate() {
-  const xml = await fetchUrl('http://lambda-the-ultimate.org/rss.xml')
+  const xml = await fetchWithRetry('http://lambda-the-ultimate.org/rss.xml')
   return parseItems(xml)
     .slice(0, 15)
     .map(item => ({ ...item, source: 'Lambda the Ultimate' }))
 }
 
-async function fetchAcm() {
-  // PACMPL = Proceedings of the ACM on Programming Languages (POPL, ICFP, OOPSLA, …)
-  // TOPLAS = ACM Transactions on Programming Languages and Systems
-  const feeds = [
-    'https://dl.acm.org/action/showFeed?type=etoc&feed=rss&jc=PACMPL',
-    'https://dl.acm.org/action/showFeed?type=etoc&feed=rss&jc=TOPLAS',
-  ]
-  const items = []
-  for (const url of feeds) {
-    const xml = await fetchUrl(url)
-    items.push(...parseItems(xml))
-  }
-  return items.map(item => ({ ...item, source: 'ACM DL' }))
+async function fetchDblp() {
+  // DBLP Computer Science Bibliography — JSON search API, no key required.
+  // Results come back in DBLP's default relevance order; we filter to recent
+  // years and sort by year descending as a secondary signal.
+  const url = 'https://dblp.org/search/publ/api?q=programming+language&format=json&h=40&f=0'
+  const json = JSON.parse(await fetchWithRetry(url))
+  const hits = json.result?.hits?.hit || []
+  const currentYear = new Date().getFullYear()
+  return hits
+    .map(h => {
+      const info = h.info || {}
+
+      // authors.author is a single object, an array of objects, or absent
+      const rawAuthors = info.authors?.author
+      const authorList = Array.isArray(rawAuthors)
+        ? rawAuthors
+        : rawAuthors && typeof rawAuthors === 'object'
+          ? [rawAuthors]
+          : []
+      // Guard against entries that are plain strings rather than {text:...} objects
+      const author = authorList
+        .filter(a => a && typeof a.text === 'string')
+        .map(a => a.text)
+        .join(', ')
+
+      // info.ee can be a single URL string or an array of URLs; pick the first
+      const eeRaw = info.ee
+      const link = Array.isArray(eeRaw) ? eeRaw[0] : (eeRaw || info.url || '')
+
+      // DBLP titles sometimes contain HTML entities — decode them
+      const title = decodeEntities(info.title || '')
+
+      return {
+        title,
+        link,
+        author,
+        abstract: '',
+        pubDate:  info.year || '',
+        year:     Number(info.year) || 0,
+        source:   'DBLP',
+      }
+    })
+    // Keep only recent papers (current year and one year back)
+    .filter(a => a.year >= currentYear - 1)
+    .sort((a, b) => b.year - a.year)
+}
+
+async function fetchIeee() {
+  // IEEE Transactions on Software Engineering — scholarly CS/engineering journal
+  const xml = await fetchWithRetry('https://ieeexplore.ieee.org/rss/TOC32.XML')
+  return parseItems(xml)
+    .filter(item => item.title && item.title !== 'Front Cover' && item.title !== 'Back Cover')
+    .map(item => ({ ...item, source: 'IEEE' }))
 }
 
 async function fetchMedium() {
@@ -217,7 +273,7 @@ async function fetchMedium() {
   const tags = ['programming-languages', 'programming-language']
   const items = []
   for (const tag of tags) {
-    const xml = await fetchUrl(`https://medium.com/feed/tag/${tag}`)
+    const xml = await fetchWithRetry(`https://medium.com/feed/tag/${tag}`)
     items.push(...parseItems(xml))
   }
   return items.map(item => ({ ...item, source: 'Medium' }))
@@ -226,7 +282,7 @@ async function fetchMedium() {
 async function fetchHackerNews() {
   // Algolia HN search API — recent stories mentioning "programming language"
   const url = 'https://hn.algolia.com/api/v1/search_by_date?tags=story&query=programming+language&hitsPerPage=20'
-  const json = JSON.parse(await fetchUrl(url))
+  const json = JSON.parse(await fetchWithRetry(url))
   return (json.hits || []).map(hit => ({
     title:    hit.title || '',
     link:     hit.url || `https://news.ycombinator.com/item?id=${hit.objectID}`,
@@ -243,12 +299,13 @@ async function fetchLatestNews() {
   const allItems = []
 
   const sources = [
-    { name: 'arXiv cs.PL',        fn: fetchArxiv },
-    { name: 'ACM DL',             fn: fetchAcm },
-    { name: 'lobste.rs/t/plt',    fn: fetchLobsters },
+    { name: 'arXiv cs.PL',         fn: fetchArxiv },
+    { name: 'DBLP',                fn: fetchDblp },
+    { name: 'IEEE',                fn: fetchIeee },
+    { name: 'lobste.rs/t/plt',     fn: fetchLobsters },
     { name: 'Lambda the Ultimate', fn: fetchLambdaUltimate },
-    { name: 'Medium',             fn: fetchMedium },
-    { name: 'Hacker News',        fn: fetchHackerNews },
+    { name: 'Medium',              fn: fetchMedium },
+    { name: 'Hacker News',         fn: fetchHackerNews },
   ]
 
   for (const src of sources) {
@@ -313,7 +370,7 @@ function writeLatestNewsScroll(articles, fetchDate) {
   fs.writeFileSync(path.join(ROOT, 'latestNews.scroll'), widgetContent)
 
   // ── Full news page ────────────────────────────────────────────────────────
-  const SOURCE_ORDER = ['arXiv cs.PL', 'ACM DL', 'lobste.rs', 'Lambda the Ultimate', 'Medium', 'Hacker News']
+  const SOURCE_ORDER = ['arXiv cs.PL', 'DBLP', 'IEEE', 'lobste.rs', 'Lambda the Ultimate', 'Medium', 'Hacker News']
   const bySource = {}
   for (const src of SOURCE_ORDER) bySource[src] = []
   for (const a of ordered) {
@@ -327,7 +384,8 @@ function writeLatestNewsScroll(articles, fetchDate) {
     if (!items || !items.length) continue
     const LABELS = {
       'arXiv cs.PL': 'Academic Papers (arXiv cs.PL)',
-      'ACM DL': 'ACM Digital Library (PACMPL & TOPLAS)',
+      'DBLP':        'DBLP Computer Science Bibliography',
+      'IEEE':        'IEEE Transactions on Software Engineering',
     }
     const label = LABELS[src] || src
     sectionsHtml += `\n<h2>${esc(label)}</h2>\n<ul class="pldbNewsFull">\n`
@@ -341,7 +399,7 @@ rootHeader.scroll
 
 # Research and News on Programming Languages
 
-<p class="pldbNewsUpdated">Updated: ${fetchDate} &nbsp;·&nbsp; Sources: arXiv cs.PL &nbsp;·&nbsp; ACM Digital Library &nbsp;·&nbsp; lobste.rs/t/plt &nbsp;·&nbsp; Lambda the Ultimate &nbsp;·&nbsp; Medium &nbsp;·&nbsp; Hacker News</p>
+<p class="pldbNewsUpdated">Updated: ${fetchDate} &nbsp;·&nbsp; Sources: arXiv cs.PL &nbsp;·&nbsp; DBLP &nbsp;·&nbsp; IEEE Transactions on Software Engineering &nbsp;·&nbsp; lobste.rs/t/plt &nbsp;·&nbsp; Lambda the Ultimate &nbsp;·&nbsp; Medium &nbsp;·&nbsp; Hacker News</p>
 ${sectionsHtml}
 footer.scroll
 `
