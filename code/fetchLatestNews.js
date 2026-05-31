@@ -312,7 +312,7 @@ function writeLatestNewsScroll(articles, fetchDate) {
     if (!items || !items.length) continue
     const LABELS = {
       'arXiv cs.PL': 'Academic Papers (arXiv cs.PL)',
-      'ACM DL': 'ACM Digital Library (PACMPL &amp; TOPLAS)',
+      'ACM DL': 'ACM Digital Library (PACMPL & TOPLAS)',
     }
     const label = LABELS[src] || src
     sectionsHtml += `\n<h2>${esc(label)}</h2>\n<ul class="pldbNewsFull">\n`
