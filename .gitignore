@@ -13,6 +13,7 @@ sitemap.txt
 feed.xml
 katex.min*
 features/*.scroll
+news.scroll
 *.csv
 *.json
 *.tsv
