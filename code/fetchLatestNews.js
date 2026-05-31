@@ -67,9 +67,25 @@ function detectLanguages(title, abstract) {
   return LANGUAGES.filter(lang => mentionsLanguage(combined, lang))
 }
 
-// ─── HTTP fetch with redirect following ──────────────────────────────────────
+// ─── HTTP fetch with redirect following and retry ────────────────────────────
 
-function fetchUrl(url, timeoutMs = 12000, redirects = 0) {
+async function fetchWithRetry(url, { retries = 5, timeoutMs = 20000, retryDelayMs = 2000 } = {}) {
+  let lastErr
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      return await fetchUrl(url, timeoutMs)
+    } catch (err) {
+      lastErr = err
+      if (attempt < retries) {
+        console.warn(`  ↻ ${url} failed (attempt ${attempt}/${retries}): ${err.message} — retrying in ${retryDelayMs / 1000}s`)
+        await new Promise(r => setTimeout(r, retryDelayMs))
+      }
+    }
+  }
+  throw lastErr
+}
+
+function fetchUrl(url, timeoutMs = 20000, redirects = 0) {
   return new Promise((resolve, reject) => {
     if (redirects > 5) return reject(new Error('Too many redirects'))
     const mod = url.startsWith('https') ? https : http
@@ -174,7 +190,7 @@ async function fetchArxiv() {
   // Use the arXiv API (Atom) rather than the RSS feed, which is empty on weekends.
   // cs.PL = Programming Languages — all papers are PL-related by category.
   const url = 'https://export.arxiv.org/api/query?search_query=cat:cs.PL&start=0&max_results=40&sortBy=submittedDate&sortOrder=descending'
-  const xml = await fetchUrl(url)
+  const xml = await fetchWithRetry(url)
   return parseItems(xml).map(item => ({
     ...item,
     // The API id URL is the canonical link; link field may have it already
@@ -184,14 +200,14 @@ async function fetchArxiv() {
 }
 
 async function fetchLobsters() {
-  const xml = await fetchUrl('https://lobste.rs/t/plt.rss')
+  const xml = await fetchWithRetry('https://lobste.rs/t/plt.rss')
   return parseItems(xml)
     .slice(0, 20)
     .map(item => ({ ...item, source: 'lobste.rs' }))
 }
 
 async function fetchLambdaUltimate() {
-  const xml = await fetchUrl('http://lambda-the-ultimate.org/rss.xml')
+  const xml = await fetchWithRetry('http://lambda-the-ultimate.org/rss.xml')
   return parseItems(xml)
     .slice(0, 15)
     .map(item => ({ ...item, source: 'Lambda the Ultimate' }))
@@ -202,7 +218,7 @@ async function fetchDblp() {
   // Results come back in DBLP's default relevance order; we filter to recent
   // years and sort by year descending as a secondary signal.
   const url = 'https://dblp.org/search/publ/api?q=programming+language&format=json&h=40&f=0'
-  const json = JSON.parse(await fetchUrl(url))
+  const json = JSON.parse(await fetchWithRetry(url))
   const hits = json.result?.hits?.hit || []
   const currentYear = new Date().getFullYear()
   return hits
@@ -246,7 +262,7 @@ async function fetchDblp() {
 
 async function fetchIeee() {
   // IEEE Transactions on Software Engineering — scholarly CS/engineering journal
-  const xml = await fetchUrl('https://ieeexplore.ieee.org/rss/TOC32.XML')
+  const xml = await fetchWithRetry('https://ieeexplore.ieee.org/rss/TOC32.XML')
   return parseItems(xml)
     .filter(item => item.title && item.title !== 'Front Cover' && item.title !== 'Back Cover')
     .map(item => ({ ...item, source: 'IEEE' }))
@@ -257,7 +273,7 @@ async function fetchMedium() {
   const tags = ['programming-languages', 'programming-language']
   const items = []
   for (const tag of tags) {
-    const xml = await fetchUrl(`https://medium.com/feed/tag/${tag}`)
+    const xml = await fetchWithRetry(`https://medium.com/feed/tag/${tag}`)
     items.push(...parseItems(xml))
   }
   return items.map(item => ({ ...item, source: 'Medium' }))
@@ -266,7 +282,7 @@ async function fetchMedium() {
 async function fetchHackerNews() {
   // Algolia HN search API — recent stories mentioning "programming language"
   const url = 'https://hn.algolia.com/api/v1/search_by_date?tags=story&query=programming+language&hitsPerPage=20'
-  const json = JSON.parse(await fetchUrl(url))
+  const json = JSON.parse(await fetchWithRetry(url))
   return (json.hits || []).map(hit => ({
     title:    hit.title || '',
     link:     hit.url || `https://news.ycombinator.com/item?id=${hit.objectID}`,
