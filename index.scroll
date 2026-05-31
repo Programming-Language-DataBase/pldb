@@ -14,7 +14,7 @@ topTiobeLangs.scroll
 
 br 1
 
-New Posts
+Recent Posts
  link ./blog/index.html
  class pldbHomepageLink
 posts blog/frontpage
