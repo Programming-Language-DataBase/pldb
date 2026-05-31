@@ -199,7 +199,8 @@ async function fetchLambdaUltimate() {
 
 async function fetchDblp() {
   // DBLP Computer Science Bibliography — JSON search API, no key required.
-  // Search for "programming language" and sort results newest-first on our side.
+  // Results come back in DBLP's default relevance order; we filter to recent
+  // years and sort by year descending as a secondary signal.
   const url = 'https://dblp.org/search/publ/api?q=programming+language&format=json&h=40&f=0'
   const json = JSON.parse(await fetchUrl(url))
   const hits = json.result?.hits?.hit || []
@@ -207,16 +208,31 @@ async function fetchDblp() {
   return hits
     .map(h => {
       const info = h.info || {}
-      // authors field is either a single object or an array
-      const authorList = Array.isArray(info.authors?.author)
-        ? info.authors.author
-        : info.authors?.author
-          ? [info.authors.author]
+
+      // authors.author is a single object, an array of objects, or absent
+      const rawAuthors = info.authors?.author
+      const authorList = Array.isArray(rawAuthors)
+        ? rawAuthors
+        : rawAuthors && typeof rawAuthors === 'object'
+          ? [rawAuthors]
           : []
+      // Guard against entries that are plain strings rather than {text:...} objects
+      const author = authorList
+        .filter(a => a && typeof a.text === 'string')
+        .map(a => a.text)
+        .join(', ')
+
+      // info.ee can be a single URL string or an array of URLs; pick the first
+      const eeRaw = info.ee
+      const link = Array.isArray(eeRaw) ? eeRaw[0] : (eeRaw || info.url || '')
+
+      // DBLP titles sometimes contain HTML entities — decode them
+      const title = decodeEntities(info.title || '')
+
       return {
-        title:    info.title || '',
-        link:     info.ee || info.url || '',
-        author:   authorList.map(a => a.text).join(', '),
+        title,
+        link,
+        author,
         abstract: '',
         pubDate:  info.year || '',
         year:     Number(info.year) || 0,
@@ -367,7 +383,7 @@ rootHeader.scroll
 
 # Research and News on Programming Languages
 
-<p class="pldbNewsUpdated">Updated: ${fetchDate} &nbsp;·&nbsp; Sources: arXiv cs.PL &nbsp;·&nbsp; DBLP &nbsp;·&nbsp; IEEE TSE &nbsp;·&nbsp; lobste.rs/t/plt &nbsp;·&nbsp; Lambda the Ultimate &nbsp;·&nbsp; Medium &nbsp;·&nbsp; Hacker News</p>
+<p class="pldbNewsUpdated">Updated: ${fetchDate} &nbsp;·&nbsp; Sources: arXiv cs.PL &nbsp;·&nbsp; DBLP &nbsp;·&nbsp; IEEE Transactions on Software Engineering &nbsp;·&nbsp; lobste.rs/t/plt &nbsp;·&nbsp; Lambda the Ultimate &nbsp;·&nbsp; Medium &nbsp;·&nbsp; Hacker News</p>
 ${sectionsHtml}
 footer.scroll
 `
