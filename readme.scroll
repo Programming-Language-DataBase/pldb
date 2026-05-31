@@ -25,17 +25,10 @@ The entire ScrollSet is ready to analyze in popular formats. Full documentation 
 
 ## To build the site locally
 code
- git clone https://github.com/breck7/pldb
+ git clone https://github.com/Programming-Language-DataBase/pldb.git
  cd pldb
- # Required to run this during first install only.
- npm i -g cloc
- # Required to run this on fresh checkout and when upgrading from an old checkout or periodically when there are new releases
- npm install .
- # (Optional) Run tests
- npm run test
- npm run build
- # After you make changes and before you commit make sure to run:
- npm run format
+ npm install
+ npm run build:serve
 
 ## Making changes and deploying
 
