@@ -197,19 +197,43 @@ async function fetchLambdaUltimate() {
     .map(item => ({ ...item, source: 'Lambda the Ultimate' }))
 }
 
-async function fetchAcm() {
-  // PACMPL = Proceedings of the ACM on Programming Languages (POPL, ICFP, OOPSLA, …)
-  // TOPLAS = ACM Transactions on Programming Languages and Systems
-  const feeds = [
-    'https://dl.acm.org/action/showFeed?type=etoc&feed=rss&jc=PACMPL',
-    'https://dl.acm.org/action/showFeed?type=etoc&feed=rss&jc=TOPLAS',
-  ]
-  const items = []
-  for (const url of feeds) {
-    const xml = await fetchUrl(url)
-    items.push(...parseItems(xml))
-  }
-  return items.map(item => ({ ...item, source: 'ACM DL' }))
+async function fetchDblp() {
+  // DBLP Computer Science Bibliography — JSON search API, no key required.
+  // Search for "programming language" and sort results newest-first on our side.
+  const url = 'https://dblp.org/search/publ/api?q=programming+language&format=json&h=40&f=0'
+  const json = JSON.parse(await fetchUrl(url))
+  const hits = json.result?.hits?.hit || []
+  const currentYear = new Date().getFullYear()
+  return hits
+    .map(h => {
+      const info = h.info || {}
+      // authors field is either a single object or an array
+      const authorList = Array.isArray(info.authors?.author)
+        ? info.authors.author
+        : info.authors?.author
+          ? [info.authors.author]
+          : []
+      return {
+        title:    info.title || '',
+        link:     info.ee || info.url || '',
+        author:   authorList.map(a => a.text).join(', '),
+        abstract: '',
+        pubDate:  info.year || '',
+        year:     Number(info.year) || 0,
+        source:   'DBLP',
+      }
+    })
+    // Keep only recent papers (current year and one year back)
+    .filter(a => a.year >= currentYear - 1)
+    .sort((a, b) => b.year - a.year)
+}
+
+async function fetchIeee() {
+  // IEEE Transactions on Software Engineering — scholarly CS/engineering journal
+  const xml = await fetchUrl('https://ieeexplore.ieee.org/rss/TOC32.XML')
+  return parseItems(xml)
+    .filter(item => item.title && item.title !== 'Front Cover' && item.title !== 'Back Cover')
+    .map(item => ({ ...item, source: 'IEEE' }))
 }
 
 async function fetchMedium() {
@@ -243,12 +267,13 @@ async function fetchLatestNews() {
   const allItems = []
 
   const sources = [
-    { name: 'arXiv cs.PL',        fn: fetchArxiv },
-    { name: 'ACM DL',             fn: fetchAcm },
-    { name: 'lobste.rs/t/plt',    fn: fetchLobsters },
+    { name: 'arXiv cs.PL',         fn: fetchArxiv },
+    { name: 'DBLP',                fn: fetchDblp },
+    { name: 'IEEE',                fn: fetchIeee },
+    { name: 'lobste.rs/t/plt',     fn: fetchLobsters },
     { name: 'Lambda the Ultimate', fn: fetchLambdaUltimate },
-    { name: 'Medium',             fn: fetchMedium },
-    { name: 'Hacker News',        fn: fetchHackerNews },
+    { name: 'Medium',              fn: fetchMedium },
+    { name: 'Hacker News',         fn: fetchHackerNews },
   ]
 
   for (const src of sources) {
@@ -313,7 +338,7 @@ function writeLatestNewsScroll(articles, fetchDate) {
   fs.writeFileSync(path.join(ROOT, 'latestNews.scroll'), widgetContent)
 
   // ── Full news page ────────────────────────────────────────────────────────
-  const SOURCE_ORDER = ['arXiv cs.PL', 'ACM DL', 'lobste.rs', 'Lambda the Ultimate', 'Medium', 'Hacker News']
+  const SOURCE_ORDER = ['arXiv cs.PL', 'DBLP', 'IEEE', 'lobste.rs', 'Lambda the Ultimate', 'Medium', 'Hacker News']
   const bySource = {}
   for (const src of SOURCE_ORDER) bySource[src] = []
   for (const a of ordered) {
@@ -327,7 +352,8 @@ function writeLatestNewsScroll(articles, fetchDate) {
     if (!items || !items.length) continue
     const LABELS = {
       'arXiv cs.PL': 'Academic Papers (arXiv cs.PL)',
-      'ACM DL': 'ACM Digital Library (PACMPL & TOPLAS)',
+      'DBLP':        'DBLP Computer Science Bibliography',
+      'IEEE':        'IEEE Transactions on Software Engineering',
     }
     const label = LABELS[src] || src
     sectionsHtml += `\n<h2>${esc(label)}</h2>\n<ul class="pldbNewsFull">\n`
@@ -341,7 +367,7 @@ rootHeader.scroll
 
 # Research and News on Programming Languages
 
-<p class="pldbNewsUpdated">Updated: ${fetchDate} &nbsp;·&nbsp; Sources: arXiv cs.PL &nbsp;·&nbsp; ACM Digital Library &nbsp;·&nbsp; lobste.rs/t/plt &nbsp;·&nbsp; Lambda the Ultimate &nbsp;·&nbsp; Medium &nbsp;·&nbsp; Hacker News</p>
+<p class="pldbNewsUpdated">Updated: ${fetchDate} &nbsp;·&nbsp; Sources: arXiv cs.PL &nbsp;·&nbsp; DBLP &nbsp;·&nbsp; IEEE TSE &nbsp;·&nbsp; lobste.rs/t/plt &nbsp;·&nbsp; Lambda the Ultimate &nbsp;·&nbsp; Medium &nbsp;·&nbsp; Hacker News</p>
 ${sectionsHtml}
 footer.scroll
 `
