@@ -261,11 +261,14 @@ async function fetchLatestNews() {
     }
   }
 
-  // Deduplicate by URL
+  // Deduplicate by URL, stripping query strings so Medium articles from both
+  // tag feeds (which differ only in the ?source=rss... parameter) collapse to one.
   const seen = new Set()
   const unique = allItems.filter(item => {
-    if (!item.link || seen.has(item.link)) return false
-    seen.add(item.link)
+    if (!item.link) return false
+    const key = item.link.split('?')[0]
+    if (seen.has(key)) return false
+    seen.add(key)
     return true
   })
 
@@ -305,7 +308,7 @@ function writeLatestNewsScroll(articles, fetchDate) {
   // ── Homepage widget ──────────────────────────────────────────────────────
   const widgetContent = `importOnly
 
-<p class="pldbHomepageLink"><a href="news.html">News on Programming Languages</a> <span style="color:#828282;font-size:0.85em;">(Updated ${fetchDate})</span></p>
+<p class="pldbHomepageLink"><a href="news.html">Research and News on Programming Languages</a> <span style="color:#828282;font-size:0.85em;">(Updated ${fetchDate})</span></p>
 `
   fs.writeFileSync(path.join(ROOT, 'latestNews.scroll'), widgetContent)
 
@@ -332,11 +335,11 @@ function writeLatestNewsScroll(articles, fetchDate) {
     sectionsHtml += '\n</ul>\n'
   }
 
-  const newsPageContent = `title Latest on Programming Languages - PLDB
+  const newsPageContent = `title Research and News on Programming Languages - PLDB
 
 rootHeader.scroll
 
-# Latest on Programming Languages
+# Research and News on Programming Languages
 
 <p class="pldbNewsUpdated">Updated: ${fetchDate} &nbsp;·&nbsp; Sources: arXiv cs.PL &nbsp;·&nbsp; ACM Digital Library &nbsp;·&nbsp; lobste.rs/t/plt &nbsp;·&nbsp; Lambda the Ultimate &nbsp;·&nbsp; Medium &nbsp;·&nbsp; Hacker News</p>
 ${sectionsHtml}
