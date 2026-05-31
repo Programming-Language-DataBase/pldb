@@ -11,9 +11,8 @@ rootHeader.scroll
 searchForm.scroll
 topLangs.scroll
 topTiobeLangs.scroll
-latestNews.scroll
 
-br 2
+br 1
 
 New Posts
  link ./blog/index.html
@@ -23,6 +22,10 @@ posts blog/frontpage
   compose link <a class="newPostLink" href="{titleLink}">{title}</a>
    printColumn link
     join <br>
+
+br 1
+
+latestNews.scroll
 
 </center>
 
