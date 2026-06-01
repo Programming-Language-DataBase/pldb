@@ -321,11 +321,14 @@ function patchScrollCliSnippetLinks() {
     path.join(ROOT, 'node_modules', 'scroll-cli'),
     path.join(ROOT, 'node_modules', 'scroll-cli', 'node_modules', 'scroll-cli')
   ]) {
-    // Patch "Continue reading" link in makeSnippet
+    // Patch "Continue reading" link in makeSnippet.
+    // Uses root-relative paths (e.g. /blog/foo.html) so links resolve correctly
+    // when a directory page is served without a trailing slash. Note: root-relative
+    // links do not work under file:// — a local server (e.g. npx serve) is required.
     patchFile(
       path.join(base, 'parsers', 'snippets.parsers'),
       `    const linkRelativeToCompileTarget = buildSettings.relativePath + scrollProgram.permalink`,
-      `    const _absLink = scrollProgram.absoluteLink\n    const linkRelativeToCompileTarget = _absLink.includes("://") ? new URL(_absLink).pathname : buildSettings.relativePath + scrollProgram.permalink`,
+      `    const _absLink = scrollProgram.absoluteLink\n    const linkRelativeToCompileTarget = (_absLink && _absLink.includes("://")) ? new URL(_absLink).pathname : buildSettings.relativePath + scrollProgram.permalink`,
       'snippet continue-reading link'
     )
 

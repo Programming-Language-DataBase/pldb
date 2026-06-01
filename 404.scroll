@@ -1,6 +1,6 @@
 buildHtml
 editBaseUrl /edit.html?folderName=pldb.info&fileName=
-replace BASE_URL
+replace BASE_URL .
 title Page not found
 
 settings.scroll
