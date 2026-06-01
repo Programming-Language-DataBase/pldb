@@ -321,23 +321,54 @@ function patchScrollCliSnippetLinks() {
     path.join(ROOT, 'node_modules', 'scroll-cli'),
     path.join(ROOT, 'node_modules', 'scroll-cli', 'node_modules', 'scroll-cli')
   ]) {
-    // Patch "Continue reading" link in makeSnippet.
-    // Uses root-relative paths (e.g. /blog/foo.html) so links resolve correctly
-    // when a directory page is served without a trailing slash. Note: root-relative
-    // links do not work under file:// — a local server (e.g. npx serve) is required.
+    // Patch makeSnippet in snippets.parsers.
+    // Single atomic replacement: adds _fixRelativePaths and rewrites both code
+    // paths so all relative href/src in snippet HTML become root-relative paths
+    // (e.g. /blog/foo.html), fixing links and images when the page is served
+    // without a trailing slash. Requires a local server; does not work under file://
     patchFile(
       path.join(base, 'parsers', 'snippets.parsers'),
-      `    const linkRelativeToCompileTarget = buildSettings.relativePath + scrollProgram.permalink`,
-      `    const _absLink = scrollProgram.absoluteLink\n    const linkRelativeToCompileTarget = (_absLink && _absLink.includes("://")) ? new URL(_absLink).pathname : buildSettings.relativePath + scrollProgram.permalink`,
-      'snippet continue-reading link'
+      [
+        '    if (endSnippetIndex === -1) return scrollProgram.buildHtmlSnippet(buildSettings) + scrollProgram.editHtml',
+        '    const linkRelativeToCompileTarget = buildSettings.relativePath + scrollProgram.permalink',
+        '    const joinChar = "\\n"',
+        '    const html = scrollProgram',
+        '        .map((subparticle, index) => (index >= endSnippetIndex || subparticle.noSnippet ? "" : subparticle.buildHtmlSnippet ? subparticle.buildHtmlSnippet(buildSettings) : (subparticle.buildHtml ? subparticle.buildHtml(buildSettings) : "") ))',
+        '        .filter(i => i)',
+        '        .join(joinChar)',
+        '        .trim() +',
+        '      `<a class="scrollContinueReadingLink" href="${linkRelativeToCompileTarget}">Continue reading...</a>`',
+        '    return html',
+        '  }'
+      ].join('\n'),
+      [
+        '    const _absLink = scrollProgram.absoluteLink',
+        '    const _dir = (_absLink && _absLink.includes("://")) ? new URL(_absLink).pathname.replace(/[^/]+$/, "") : ""',
+        '    const _fixRelativePaths = html => _dir ? html.replace(/(href|src)="(?!\\/|[a-z][a-z0-9+.-]*:|#)([^"]+)"/g, (_, attr, val) => `${attr}="${_dir}${val}"`) : html',
+        '    if (endSnippetIndex === -1) return _fixRelativePaths(scrollProgram.buildHtmlSnippet(buildSettings) + scrollProgram.editHtml)',
+        '    const linkRelativeToCompileTarget = (_absLink && _absLink.includes("://")) ? new URL(_absLink).pathname : buildSettings.relativePath + scrollProgram.permalink',
+        '    const joinChar = "\\n"',
+        '    const html = scrollProgram',
+        '        .map((subparticle, index) => (index >= endSnippetIndex || subparticle.noSnippet ? "" : subparticle.buildHtmlSnippet ? subparticle.buildHtmlSnippet(buildSettings) : (subparticle.buildHtml ? subparticle.buildHtml(buildSettings) : "") ))',
+        '        .filter(i => i)',
+        '        .join(joinChar)',
+        '        .trim() +',
+        '      `<a class="scrollContinueReadingLink" href="${linkRelativeToCompileTarget}">Continue reading...</a>`',
+        '    return _fixRelativePaths(html)',
+        '  }'
+      ].join('\n'),
+      'makeSnippet (atomic root-relative links + _fixRelativePaths)'
     )
 
-    // Patch printTitle link in title.parsers
+    // Patch printTitle to use root-relative permalink
     patchFile(
       path.join(base, 'parsers', 'title.parsers'),
       `   const { permalink } = this.root`,
-      `   const _absLink = this.root.absoluteLink\n   const permalink = (_absLink && _absLink.includes("://")) ? new URL(_absLink).pathname : this.root.permalink`,
-      'printTitle link'
+      [
+        `   const _absLink = this.root.absoluteLink`,
+        `   const permalink = (_absLink && _absLink.includes("://")) ? new URL(_absLink).pathname : this.root.permalink`
+      ].join('\n'),
+      'printTitle root-relative link'
     )
   }
 }
