@@ -322,31 +322,42 @@ function patchScrollCliSnippetLinks() {
     path.join(ROOT, 'node_modules', 'scroll-cli', 'node_modules', 'scroll-cli')
   ]) {
     // Patch makeSnippet in snippets.parsers.
-    // Adds a _fixRelativePaths helper that converts all relative href/src
-    // attributes in snippet HTML to root-relative paths (e.g. /blog/foo.html).
-    // This fixes "Continue reading", title, and all inline links/images when
-    // a directory page is served without a trailing slash.
-    // Note: root-relative links require a local server; they do not work under file://
+    // Single atomic replacement: adds _fixRelativePaths and rewrites both code
+    // paths so all relative href/src in snippet HTML become root-relative paths
+    // (e.g. /blog/foo.html), fixing links and images when the page is served
+    // without a trailing slash. Requires a local server; does not work under file://
     patchFile(
       path.join(base, 'parsers', 'snippets.parsers'),
       [
-        `    if (endSnippetIndex === -1) return scrollProgram.buildHtmlSnippet(buildSettings) + scrollProgram.editHtml`,
-        `    const linkRelativeToCompileTarget = buildSettings.relativePath + scrollProgram.permalink`
+        '    if (endSnippetIndex === -1) return scrollProgram.buildHtmlSnippet(buildSettings) + scrollProgram.editHtml',
+        '    const linkRelativeToCompileTarget = buildSettings.relativePath + scrollProgram.permalink',
+        '    const joinChar = "\\n"',
+        '    const html = scrollProgram',
+        '        .map((subparticle, index) => (index >= endSnippetIndex || subparticle.noSnippet ? "" : subparticle.buildHtmlSnippet ? subparticle.buildHtmlSnippet(buildSettings) : (subparticle.buildHtml ? subparticle.buildHtml(buildSettings) : "") ))',
+        '        .filter(i => i)',
+        '        .join(joinChar)',
+        '        .trim() +',
+        '      `<a class="scrollContinueReadingLink" href="${linkRelativeToCompileTarget}">Continue reading...</a>`',
+        '    return html',
+        '  }'
       ].join('\n'),
       [
-        `    const _absLink = scrollProgram.absoluteLink`,
-        `    const _dir = (_absLink && _absLink.includes("://")) ? new URL(_absLink).pathname.replace(/[^/]+$/, "") : ""`,
-        `    const _fixRelativePaths = html => _dir ? html.replace(/(href|src)="(?!\\/|[a-z][a-z0-9+.-]*:|#)([^"]+)"/g, (_, attr, val) => \`\${attr}="\${_dir}\${val}"\`) : html`,
-        `    if (endSnippetIndex === -1) return _fixRelativePaths(scrollProgram.buildHtmlSnippet(buildSettings) + scrollProgram.editHtml)`,
-        `    const linkRelativeToCompileTarget = (_absLink && _absLink.includes("://")) ? new URL(_absLink).pathname : buildSettings.relativePath + scrollProgram.permalink`
+        '    const _absLink = scrollProgram.absoluteLink',
+        '    const _dir = (_absLink && _absLink.includes("://")) ? new URL(_absLink).pathname.replace(/[^/]+$/, "") : ""',
+        '    const _fixRelativePaths = html => _dir ? html.replace(/(href|src)="(?!\\/|[a-z][a-z0-9+.-]*:|#)([^"]+)"/g, (_, attr, val) => `${attr}="${_dir}${val}"`) : html',
+        '    if (endSnippetIndex === -1) return _fixRelativePaths(scrollProgram.buildHtmlSnippet(buildSettings) + scrollProgram.editHtml)',
+        '    const linkRelativeToCompileTarget = (_absLink && _absLink.includes("://")) ? new URL(_absLink).pathname : buildSettings.relativePath + scrollProgram.permalink',
+        '    const joinChar = "\\n"',
+        '    const html = scrollProgram',
+        '        .map((subparticle, index) => (index >= endSnippetIndex || subparticle.noSnippet ? "" : subparticle.buildHtmlSnippet ? subparticle.buildHtmlSnippet(buildSettings) : (subparticle.buildHtml ? subparticle.buildHtml(buildSettings) : "") ))',
+        '        .filter(i => i)',
+        '        .join(joinChar)',
+        '        .trim() +',
+        '      `<a class="scrollContinueReadingLink" href="${linkRelativeToCompileTarget}">Continue reading...</a>`',
+        '    return _fixRelativePaths(html)',
+        '  }'
       ].join('\n'),
-      'makeSnippet (early-return + link + _fixRelativePaths helper)'
-    )
-    patchFile(
-      path.join(base, 'parsers', 'snippets.parsers'),
-      `    return html\n  }`,
-      `    return _fixRelativePaths(html)\n  }`,
-      'makeSnippet (wrap return with _fixRelativePaths)'
+      'makeSnippet (atomic root-relative links + _fixRelativePaths)'
     )
 
     // Patch printTitle to use root-relative permalink
