@@ -148,6 +148,10 @@ async function build() {
   console.log('\n🔧 Step 2b: Patching scroll-cli copy button for non-HTTPS contexts...')
   patchScrollCliCopyButton()
 
+  // Step 2c: Patch scroll-cli snippets to use root-relative links
+  console.log('\n🔧 Step 2c: Patching scroll-cli snippets links to be root-relative...')
+  patchScrollCliSnippetLinks()
+
   // Step 2.5: Fetch TIOBE top 10 and write topTiobeLangs.scroll
   console.log('\n📋 Step 2.5: Fetching TIOBE top 10 languages...')
   try {
@@ -296,6 +300,42 @@ function patchScrollCliCopyButton() {
     } else {
       console.log(`  ⚠️  Copy button pattern not found in ${path.relative(ROOT, filePath)} — scroll-cli may have changed`)
     }
+  }
+}
+
+function patchScrollCliSnippetLinks() {
+  const patchFile = (filePath, oldStr, patchedStr, label) => {
+    if (!fs.existsSync(filePath)) return
+    const content = fs.readFileSync(filePath, 'utf8')
+    if (content.includes(oldStr)) {
+      fs.writeFileSync(filePath, content.replace(oldStr, patchedStr))
+      console.log(`  ✅ Patched ${label} in ${path.relative(ROOT, filePath)}`)
+    } else if (content.includes(patchedStr)) {
+      console.log(`  Already patched ${label}: ${path.relative(ROOT, filePath)}`)
+    } else {
+      console.log(`  ⚠️  ${label} pattern not found in ${path.relative(ROOT, filePath)} — scroll-cli may have changed`)
+    }
+  }
+
+  for (const base of [
+    path.join(ROOT, 'node_modules', 'scroll-cli'),
+    path.join(ROOT, 'node_modules', 'scroll-cli', 'node_modules', 'scroll-cli')
+  ]) {
+    // Patch "Continue reading" link in makeSnippet
+    patchFile(
+      path.join(base, 'parsers', 'snippets.parsers'),
+      `    const linkRelativeToCompileTarget = buildSettings.relativePath + scrollProgram.permalink`,
+      `    const _absLink = scrollProgram.absoluteLink\n    const linkRelativeToCompileTarget = _absLink.includes("://") ? new URL(_absLink).pathname : buildSettings.relativePath + scrollProgram.permalink`,
+      'snippet continue-reading link'
+    )
+
+    // Patch printTitle link in title.parsers
+    patchFile(
+      path.join(base, 'parsers', 'title.parsers'),
+      `   const { permalink } = this.root`,
+      `   const _absLink = this.root.absoluteLink\n   const permalink = (_absLink && _absLink.includes("://")) ? new URL(_absLink).pathname : this.root.permalink`,
+      'printTitle link'
+    )
   }
 }
 
