@@ -398,7 +398,7 @@ function writeLatestNewsScroll(articles, fetchDate) {
     }
     const label = LABELS[src] || src
     const url = URLS[src]
-    const headingInner = url ? `<a href="${url}" target="_blank" rel="noopener">${esc(label)}</a>` : esc(label)
+    const headingInner = url ? `<a href="${esc(url)}" target="_blank" rel="noopener">${esc(label)}</a>` : esc(label)
     sectionsHtml += `\n<h2 class="pldbNewsHeading">${headingInner}</h2>\n<ul class="pldbNewsFull">\n`
     sectionsHtml += items.map(articleToLi).join('\n')
     sectionsHtml += '\n</ul>\n'
