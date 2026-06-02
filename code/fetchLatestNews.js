@@ -396,10 +396,20 @@ function writeLatestNewsScroll(articles, fetchDate) {
       'Medium':              'https://medium.com/tag/programming-languages',
       'Hacker News':         'https://news.ycombinator.com',
     }
+    const ANCHORS = {
+      'arXiv cs.PL':         'arxiv-cs-pl',
+      'DBLP':                'dblp',
+      'IEEE':                'ieee',
+      'lobste.rs':           'lobsters',
+      'Lambda the Ultimate': 'lambda-the-ultimate',
+      'Medium':              'medium',
+      'Hacker News':         'hacker-news',
+    }
     const label = LABELS[src] || src
     const url = URLS[src]
+    const anchor = ANCHORS[src]
     const headingInner = url ? `<a href="${esc(url)}" target="_blank" rel="noopener">${esc(label)}</a>` : esc(label)
-    sectionsHtml += `\n<h2 class="pldbNewsHeading">${headingInner}</h2>\n<ul class="pldbNewsFull">\n`
+    sectionsHtml += `\n<h2 class="pldbNewsHeading"${anchor ? ` id="${anchor}"` : ''}>${headingInner}</h2>\n<ul class="pldbNewsFull">\n`
     sectionsHtml += items.map(articleToLi).join('\n')
     sectionsHtml += '\n</ul>\n'
   }
@@ -410,7 +420,7 @@ rootHeader.scroll
 
 # Research and News on Programming Languages
 
-<p class="pldbNewsUpdated">Updated: ${fetchDate} &nbsp;·&nbsp; Sources: <a href="https://arxiv.org/list/cs.PL/recent" target="_blank" rel="noopener">arXiv cs.PL</a> &nbsp;·&nbsp; <a href="https://dblp.org" target="_blank" rel="noopener">DBLP</a> &nbsp;·&nbsp; <a href="https://ieeexplore.ieee.org/xpl/RecentIssue.jsp?punumber=32" target="_blank" rel="noopener">IEEE Transactions on Software Engineering</a> &nbsp;·&nbsp; <a href="https://lobste.rs/t/plt" target="_blank" rel="noopener">lobste.rs/t/plt</a> &nbsp;·&nbsp; <a href="http://lambda-the-ultimate.org" target="_blank" rel="noopener">Lambda the Ultimate</a> &nbsp;·&nbsp; <a href="https://medium.com/tag/programming-languages" target="_blank" rel="noopener">Medium</a> &nbsp;·&nbsp; <a href="https://news.ycombinator.com" target="_blank" rel="noopener">Hacker News</a></p>
+<p class="pldbNewsUpdated">Updated: ${fetchDate} &nbsp;·&nbsp; Sources: <a href="#arxiv-cs-pl">arXiv cs.PL</a> &nbsp;·&nbsp; <a href="#dblp">DBLP</a> &nbsp;·&nbsp; <a href="#ieee">IEEE Transactions on Software Engineering</a> &nbsp;·&nbsp; <a href="#lobsters">lobste.rs/t/plt</a> &nbsp;·&nbsp; <a href="#lambda-the-ultimate">Lambda the Ultimate</a> &nbsp;·&nbsp; <a href="#medium">Medium</a> &nbsp;·&nbsp; <a href="#hacker-news">Hacker News</a></p>
 ${sectionsHtml}
 footer.scroll
 `
