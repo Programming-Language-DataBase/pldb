@@ -387,8 +387,29 @@ function writeLatestNewsScroll(articles, fetchDate) {
       'DBLP':        'DBLP Computer Science Bibliography',
       'IEEE':        'IEEE Transactions on Software Engineering',
     }
+    const URLS = {
+      'arXiv cs.PL':         'https://arxiv.org/list/cs.PL/recent',
+      'DBLP':                'https://dblp.org',
+      'IEEE':                'https://ieeexplore.ieee.org/xpl/RecentIssue.jsp?punumber=32',
+      'lobste.rs':           'https://lobste.rs/t/plt',
+      'Lambda the Ultimate': 'http://lambda-the-ultimate.org',
+      'Medium':              'https://medium.com/tag/programming-languages',
+      'Hacker News':         'https://news.ycombinator.com',
+    }
+    const ANCHORS = {
+      'arXiv cs.PL':         'arxiv-cs-pl',
+      'DBLP':                'dblp',
+      'IEEE':                'ieee',
+      'lobste.rs':           'lobsters',
+      'Lambda the Ultimate': 'lambda-the-ultimate',
+      'Medium':              'medium',
+      'Hacker News':         'hacker-news',
+    }
     const label = LABELS[src] || src
-    sectionsHtml += `\n<h2>${esc(label)}</h2>\n<ul class="pldbNewsFull">\n`
+    const url = URLS[src]
+    const anchor = ANCHORS[src]
+    const headingInner = url ? `<a href="${esc(url)}" target="_blank" rel="noopener">${esc(label)}</a>` : esc(label)
+    sectionsHtml += `\n<h2 class="pldbNewsHeading"${anchor ? ` id="${anchor}"` : ''}>${headingInner}</h2>\n<ul class="pldbNewsFull">\n`
     sectionsHtml += items.map(articleToLi).join('\n')
     sectionsHtml += '\n</ul>\n'
   }
@@ -399,7 +420,7 @@ rootHeader.scroll
 
 # Research and News on Programming Languages
 
-<p class="pldbNewsUpdated">Updated: ${fetchDate} &nbsp;·&nbsp; Sources: arXiv cs.PL &nbsp;·&nbsp; DBLP &nbsp;·&nbsp; IEEE Transactions on Software Engineering &nbsp;·&nbsp; lobste.rs/t/plt &nbsp;·&nbsp; Lambda the Ultimate &nbsp;·&nbsp; Medium &nbsp;·&nbsp; Hacker News</p>
+<p class="pldbNewsUpdated">Updated: ${fetchDate} &nbsp;·&nbsp; Sources: <a href="#arxiv-cs-pl">arXiv cs.PL</a> &nbsp;·&nbsp; <a href="#dblp">DBLP</a> &nbsp;·&nbsp; <a href="#ieee">IEEE Transactions on Software Engineering</a> &nbsp;·&nbsp; <a href="#lobsters">lobste.rs/t/plt</a> &nbsp;·&nbsp; <a href="#lambda-the-ultimate">Lambda the Ultimate</a> &nbsp;·&nbsp; <a href="#medium">Medium</a> &nbsp;·&nbsp; <a href="#hacker-news">Hacker News</a></p>
 ${sectionsHtml}
 footer.scroll
 `
