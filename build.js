@@ -175,6 +175,15 @@ async function build() {
     console.warn(`⚠️  Could not fetch latest news (${err.message}), keeping existing latestNews.scroll`)
   }
 
+  // Step 2.7: Update DBLP publications for GQL concept page
+  console.log('\n📋 Step 2.7: Updating DBLP GQL publications...')
+  try {
+    const { updateDblpGql } = require('./code/updateDblpGql.js')
+    await updateDblpGql()
+  } catch (err) {
+    console.warn(`⚠️  Could not update DBLP GQL data (${err.message}), keeping existing data`)
+  }
+
   // Step 3: Build root folder (generates pldb.json, measures.json)
   console.log('\n📋 Step 3: Building root folder...')
   run(`node "${SCROLL_CLI}" build`)
