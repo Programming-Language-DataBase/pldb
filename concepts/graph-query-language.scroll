@@ -54,20 +54,6 @@ wikipedia https://en.wikipedia.org/wiki/Graph_Query_Language
  appeared 2024
 
 dblp https://dblp.org/search?q=GQL+graph+query+language
- hits 14
+ hits 0
  publications
   year|title|doi|url
-  2026|GQL Rules: Deterministic and Safe Rule-Based Materialization for Property Graphs|10.1109/ACCESS.2026.3686122|https://doi.org/10.1109/ACCESS.2026.3686122
-  2025|GQL and SQL/PGQ: Theoretical Models and Expressive Power|10.14778/3725688.3725707|https://www.vldb.org/pvldb/vol18/p1798-libkin.pdf
-  2025|Mine Graph Rule: A New GQL Operator for Mining Association Rules in Property Graph Databases|10.1007/S00778-025-00934-8|https://doi.org/10.1007/s00778-025-00934-8
-  2025|Parallel and Distributed SQL/PGQ Query Processing for Property Graphs|10.1007/978-3-032-02215-8_12|https://doi.org/10.1007/978-3-032-02215-8_12
-  2025|Towards Cross-Model Efficiency in SQL/PGQ|10.1145/3735546.3735860|https://doi.org/10.1145/3735546.3735860
-  2025|Towards Cross-Model Efficiency in SQL/PGQ|10.48550/ARXIV.2505.07595|https://doi.org/10.48550/arXiv.2505.07595
-  2024|Chimera: A system design of dual storage and traversal-join unified query processing for SQL/PGQ|10.14778/3705829.3705845|https://www.vldb.org/pvldb/vol18/p279-lee.pdf
-  2024|GQL and SQL/PGQ: Theoretical Models and Expressive Power|10.48550/ARXIV.2409.01102|https://doi.org/10.48550/arXiv.2409.01102
-  2023|DuckPGQ: Bringing SQL/PGQ to DuckDB|10.14778/3611540.3611614|https://www.vldb.org/pvldb/vol16/p4034-wolde.pdf
-  2023|Evaluating Regular Path Queries in GQL and SQL/PGQ: How Far Can The Classical Algorithms Take Us?|10.48550/ARXIV.2306.02194|https://doi.org/10.48550/arXiv.2306.02194
-  2023|SQL/PGQ: A Systems Perspective (Abstract)||https://ceur-ws.org/Vol-3409/keynote04.pdf
-  2022|Graph Pattern Matching in GQL and SQL/PGQ|10.1145/3514221.3526057|https://doi.org/10.1145/3514221.3526057
-  2022|Graph Query Language (GQL)-structured Algorithms for Geospatial Intelligence on Public Transportation|10.1109/ICTC55196.2022.9952570|https://doi.org/10.1109/ICTC55196.2022.9952570
-  2021|Graph Pattern Matching in GQL and SQL/PGQ||https://arxiv.org/abs/2112.06217
