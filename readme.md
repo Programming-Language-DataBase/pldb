@@ -194,7 +194,42 @@ journalctl -u pldb -f    # View logs
 
 ### Redeploying after changes
 
-After pushing new changes to `main`, wait for the GitHub Actions build to complete, then re-run `setup-pldb.sh` to deploy the updated site.
+In `Programming-Language-DataBase/pldb`, pushes and merges to `main` and the Monday
+06:00 UTC scheduled build publish the `latest` release, then deploy that run's
+exact `site.tar.gz` to production over SSH. Pull request builds and forks do not
+deploy. Deployment failures fail the workflow; the release remains available.
+
+Configure these Actions secrets in the upstream repository:
+
+| Secret | Value |
+|--------|-------|
+| `PLDB_DEPLOY_HOST` | Production hostname or IP (SSH port 22) |
+| `PLDB_DEPLOY_KEY` | Private key authorized for the server's root user |
+| `PLDB_DEPLOY_KNOWN_HOSTS` | Verified OpenSSH known_hosts entry for that hostname/IP |
+
+The server must already have Node.js, npm, curl, tar, flock, and the `pldb`
+systemd service installed by `setup-pldb.sh`. Verify the SSH host key through a
+trusted channel before saving it. Missing secrets cause the deployment step to
+fail with a configuration message.
+
+For an existing server, replace `/root/pldb-update.sh` once with this wrapper
+after the first successful automatic deployment, so the weekly fallback uses
+the same deployment lock and rollback logic:
+
+```bash
+#!/bin/bash
+set -euo pipefail
+exec bash /root/pldb/code/deploy-release.sh
+```
+
+New installations create this wrapper automatically. The weekly cron job runs
+Monday at 09:00 in the server's timezone and downloads `latest` from the repository
+in `/root/pldb-repo.conf`; set that URL to
+`https://github.com/Programming-Language-DataBase/pldb` on the production server.
+Both update paths stage dependencies before replacing the site, serialize with
+`flock`, and restore the previous site if restart or HTTP health checks fail.
+
+For a manual deployment on the server, run `bash /root/pldb-update.sh`.
 
 ## 🌐 Mirrors
 

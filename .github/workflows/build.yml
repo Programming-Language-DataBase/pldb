@@ -29,6 +29,12 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Check deployment scripts
+        run: |
+          bash -n setup-pldb.sh
+          bash -n code/deploy-release.sh
+          python3 code/test_deploy_release.py
+
       - name: Build site
         run: node --max-old-space-size=4096 build.js
 
@@ -54,3 +60,30 @@ jobs:
         run: gh release create latest /tmp/site.tar.gz --title "Latest Build" --notes "Auto-built from ${{ github.sha }}"
         env:
           GH_TOKEN: ${{ github.token }}
+
+      - name: Deploy published build to production
+        if: github.repository == 'Programming-Language-DataBase/pldb' && (github.event_name == 'push' || github.event_name == 'schedule')
+        timeout-minutes: 20
+        env:
+          DEPLOY_HOST: ${{ secrets.PLDB_DEPLOY_HOST }}
+          DEPLOY_KEY: ${{ secrets.PLDB_DEPLOY_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.PLDB_DEPLOY_KNOWN_HOSTS }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          : "${DEPLOY_HOST:?Set PLDB_DEPLOY_HOST to the production server hostname or IP}"
+          : "${DEPLOY_KEY:?Set PLDB_DEPLOY_KEY to the root SSH private key}"
+          : "${DEPLOY_KNOWN_HOSTS:?Set PLDB_DEPLOY_KNOWN_HOSTS to the verified server SSH host key entry}"
+          ssh_dir=$(mktemp -d)
+          trap 'rm -rf "$ssh_dir"' EXIT
+          printf '%s\n' "$DEPLOY_KEY" > "$ssh_dir/key"
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > "$ssh_dir/known_hosts"
+          chmod 600 "$ssh_dir/key" "$ssh_dir/known_hosts"
+          ssh_options=(-i "$ssh_dir/key" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o "UserKnownHostsFile=$ssh_dir/known_hosts" -o ConnectTimeout=30)
+          artifact="/tmp/pldb-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.tar.gz"
+          scp "${ssh_options[@]}" /tmp/site.tar.gz "root@${DEPLOY_HOST}:$artifact"
+          # Deploy this run's exact artifact, even if the latest release changes.
+          status=0
+          ssh "${ssh_options[@]}" "root@${DEPLOY_HOST}" "bash -s -- '$artifact'" < code/deploy-release.sh || status=$?
+          ssh "${ssh_options[@]}" "root@${DEPLOY_HOST}" "rm -f -- '$artifact'"
+          exit "$status"
