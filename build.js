@@ -195,7 +195,8 @@ async function build() {
         runQuiet(`node "${SCROLL_CLI}" build`, folderPath)
         console.log(`  ✅ ${dir}/ built successfully`)
       } catch (err) {
-        console.error(`  ⚠️ ${dir}/ build had errors (continuing...)`)
+        console.error(`  ❌ ${dir}/ build failed; refusing to publish an incomplete site`)
+        throw err
       }
     }
   }
