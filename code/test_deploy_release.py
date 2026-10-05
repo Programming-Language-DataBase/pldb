@@ -53,6 +53,11 @@ exit 0''',
     for last; do :; done
     cp "$ARTIFACT" "$last"
 else
+    # Reject a health check routed through Nginx's HTTP redirect.
+    case " $* " in
+        *" http://127.0.0.1:3000/ "*) ;;
+        *) exit 1 ;;
+    esac
     [ "$SCENARIO" != health ]
 fi''',
             }
