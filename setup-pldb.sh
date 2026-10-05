@@ -36,6 +36,11 @@ set -e
 REPO_URL="$1"
 export DEBIAN_FRONTEND=noninteractive
 
+if [ -f /etc/systemd/system/pldb.service.d/https.conf ]; then
+    echo 'HTTPS is configured. Use /root/pldb-update.sh for deployments; this bootstrap script requires port 80.' >&2
+    exit 1
+fi
+
 echo ">>> Updating package lists..."
 apt-get update -qq
 
@@ -216,6 +221,10 @@ cat > /root/pldb-update.sh << 'UPDATEEOF'
 #!/bin/bash
 # Use the deployed updater so improvements arrive with each release.
 set -euo pipefail
+# Fresh HTTP-only installations use port 80 until HTTPS is configured.
+if [ ! -f /etc/systemd/system/pldb.service.d/https.conf ]; then
+    export PLDB_HEALTH_URL=http://127.0.0.1:80/
+fi
 exec bash /root/pldb/code/deploy-release.sh
 UPDATEEOF
 chmod +x /root/pldb-update.sh

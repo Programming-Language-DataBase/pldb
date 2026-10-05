@@ -6,6 +6,7 @@ exec 9>/root/pldb-deploy.lock
 flock -w 600 9
 
 INSTALL_DIR=/root/pldb
+HEALTH_URL=${PLDB_HEALTH_URL:-http://127.0.0.1:3000/}
 STAGING=$(mktemp -d /root/pldb-staging.XXXXXX)
 BACKUP="$STAGING/previous"
 SWAPPED=false
@@ -52,7 +53,7 @@ systemctl restart pldb
 
 for attempt in {1..12}; do
     if systemctl is-active --quiet pldb && \
-        curl --fail --silent --max-time 5 http://localhost:80/ -o /dev/null; then
+        curl --fail --silent --max-time 5 "$HEALTH_URL" -o /dev/null; then
         SUCCESS=true
         echo 'PLDB deployment healthy.'
         exit 0

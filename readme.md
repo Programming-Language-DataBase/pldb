@@ -231,6 +231,25 @@ Both update paths stage dependencies before replacing the site, serialize with
 
 For a manual deployment on the server, run `bash /root/pldb-update.sh`.
 
+### Production HTTPS
+
+Production uses Nginx on ports 80/443, forwarding to PLDB on
+`127.0.0.1:3000`. The systemd override at
+`/etc/systemd/system/pldb.service.d/https.conf` sets
+`ExecStart=/usr/bin/npx serve . -l tcp://127.0.0.1:3000` (after clearing ExecStart).
+Certbot manages the certificate for `pldb.info` and `www.pldb.info` and renews
+it through `snap.certbot.renew.timer`.
+
+Deployments check the application directly on port 3000, so an Nginx redirect
+cannot mask application failure. For a legacy HTTP-only server, set
+`PLDB_HEALTH_URL=http://127.0.0.1:80/`; fresh bootstrap installations set this
+in the weekly wrapper until the HTTPS override exists.
+
+Site artifact updates preserve Nginx configuration, certificates, and the
+systemd override outside `/root/pldb`. Do not rerun `setup-pldb.sh` on the
+HTTPS server: it provisions an HTTP-only server and now refuses to run when
+the HTTPS override exists. Use the release deployment workflow instead.
+
 ## 🌐 Mirrors
 
 The primary site is hosted at [pldb.info](http://pldb.info) via ScrollHub. For offline access or redundancy, you can clone the repository and build locally:
