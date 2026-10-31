@@ -1,0 +1,67 @@
+../code/conceptPage.scroll
+
+id kerfscript
+name KerfScript
+appeared 2026
+creators Julia Malkov
+tags pl cad
+website https://kerfscript.mylasertools.com
+description KerfScript is a declarative, parametric programming language for designing parts for laser cutters. It is to laser cutters what OpenSCAD is to 3D printers, except it was designed for flat parts from the start: programs build 2D geometry, assign it to cut, score or engrave layers, and group shapes into parts, and the renderer applies kerf compensation, packs parts on sheets and exports SVG or DXF.
+fileExtensions kerf
+writtenIn typescript
+isOpenSource true
+githubRepo https://github.com/mylasertools/kerfscript
+fileType text
+
+lineCommentToken //
+multiLineCommentTokens /* */
+stringToken "
+assignmentToken =
+booleanTokens true false
+includeToken use
+printToken echo
+keywords module function if else for let each use include true false undef
+
+hasComments true
+hasLineComments true
+hasConditionals true
+hasForLoops true
+hasFunctions true
+hasAnonymousFunctions true
+hasLists true
+hasStrings true
+hasModules true
+hasStandardLibrary true
+hasSemanticIndentation false
+
+repoStats
+ firstCommit 2026
+ newestCommit 2026
+ commits 38
+ committers 1
+ files 235
+ mb 19
+ linesOfCode 3845
+
+example
+  // A coaster with a hole, an engraved ring and a scored border.
+  size = 90; // [60:5:120]
+  
+  difference() {
+    circle(d = size);
+    circle(d = 6);
+  }
+  engrave() difference() { circle(d = size - 16); circle(d = size - 22); }
+  score() circle(d = size - 6);
+
+example
+  use <kerf/box>
+  
+  width = 120;
+  depth = 80;
+  height = 50;
+  
+  $thickness = 3;
+  $kerf = 0.15;
+  
+  box([width, depth, height], lid = true);
