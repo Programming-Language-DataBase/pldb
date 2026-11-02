@@ -1,0 +1,29 @@
+../code/conceptPage.scroll
+
+id topaz-studiohaze
+name Topaz
+creators STUDIO HAZE
+tags pl
+website https://topaz.ooo/
+aka 토파즈
+description Topaz is a general-purpose programming language with typesetting built in. Code that does the same job looks the same no matter who writes it. Its compiler is written in Topaz and emits Rust. The documented toolchain includes direct execution, native programs, and Web and Worker targets. Native executables are distributed for Windows, macOS, and Linux. The public repository publishes compiler release source. This is distinct from the 2021 Topaz language by m-schm.
+fileExtensions tpz
+writtenIn topaz-studiohaze rust
+compilesTo rust
+
+docs https://topaz.ooo/v5.21/en/docs/getting-started
+reference https://topaz.ooo/v5.21/en/docs/introduction
+reference https://topaz.ooo/v5.21/en/docs/toolchain/backends
+reference https://topaz.ooo/v5.21/en/docs/project/history
+reference https://topaz.ooo/v5.21/en/docs/install
+
+githubRepo https://github.com/studiohaze/topaz
+
+hasStaticTyping true
+hasTypeInference true
+
+example
+ import std.io
+ let topic = "Topaz basics"
+ let minutes: int = 25
+ io.writeLine("{topic}: {minutes} minutes")

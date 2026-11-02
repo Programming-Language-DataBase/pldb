@@ -1,0 +1,24 @@
+../code/conceptPage.scroll
+
+id lispex
+name Lispex
+creators STUDIO HAZE
+tags pl
+website https://www.lispex.com/
+aka 리스펙스
+description Lispex is a language for writing business rules, such as a publisher's house style. It cannot touch files or the network, so it is safe to run inside any program. Its Rust implementation provides a source tree interpreter and a virtual machine that verifies bytecode before execution. It is available through native executables for Windows, macOS, and Linux, npm, WebAssembly, and a browser playground. Separate embeddable evaluators accept explicit work and memory limits. Topaz embeds a Lispex evaluator.
+fileExtensions lspx
+writtenIn rust
+
+docs https://www.lispex.com/v1.21/en/docs/getting-started
+reference https://www.lispex.com/v1.21/en/docs/reference/runtime-backends
+reference https://www.lispex.com/v1.21/en/docs/reference/bounded-evaluator
+reference https://www.lispex.com/v1.21/en/docs/guides/verified-bytecode
+reference https://www.lispex.com/v1.21/en/docs/history
+reference https://www.lispex.com/v1.21/en/docs/philosophy
+reference https://www.lispex.com/v1.21/en/downloads
+reference https://topaz.ooo/v5.21/en/docs/guides/lispex-application
+
+example
+ (define language "Lispex")
+ (list 'hello language (+ 2 3))
