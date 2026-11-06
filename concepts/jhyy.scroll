@@ -1,0 +1,90 @@
+../code/conceptPage.scroll
+
+id jhyy
+name JHYY
+appeared 2026
+creators JHYY
+tags pl
+website https://github.com/JiHuiYiYou/JiHuiYiYou-compiler
+spec https://github.com/JiHuiYiYou/JiHuiYiYou-compiler/blob/main/docs/abis/jhyy-lang-spec-v4.0.0.md
+docs https://github.com/JiHuiYiYou/JiHuiYiYou-compiler/blob/main/docs/abis/jhyy-lang-spec-v4.0.0.md
+releaseNotes https://github.com/JiHuiYiYou/JiHuiYiYou-compiler/blob/main/CHANGELOG.md
+faq https://github.com/JiHuiYiYou/JiHuiYiYou-compiler/wiki
+latestVersion 4.1.3
+description A self-hosted, statically typed, expression-oriented systems programming language whose compiler is written in itself and compiles itself to a byte-identical fixed point.
+writtenIn jhyy
+fileExtensions jhyy
+isOpenSource true
+country China
+rosettaCode https://rosettacode.org/wiki/Category:JHYY
+
+repoStats
+ firstCommit 2026
+ commits 1123
+ committers 1
+ files 873
+ newestCommit 2026
+ mb 40
+ linesOfCode 76525
+
+githubRepo https://github.com/JiHuiYiYou/JiHuiYiYou-compiler
+ firstCommit 2026
+ stars 8
+ forks 0
+ subscribers 1
+ created 2026
+ updated 2026
+ description JHYY (机会翼游) - a self-hosted, statically typed, expression-oriented systems language. The compiler is written in itself and reproduces itself byte-for-byte to a fixed point. The backend is a self-written amd64 emitter - no QBE, no LLVM, no GC, no managed runtime.
+ issues 0
+
+example
+ extern fn puts(s: *u8) -> i32;
+
+ fn main_jhyy() -> i32 {
+     puts("Hello, world!");
+     0
+ }
+
+ description Hello world. The hosted entry point of a JHYY program is main_jhyy rather than main, and C library functions are reached through extern fn declarations on the C ABI.
+ fileExtensions jhyy
+ website https://github.com/JiHuiYiYou/JiHuiYiYou-compiler
+ gitRepo https://github.com/JiHuiYiYou/JiHuiYiYou-compiler
+example
+ type Point = struct { x: i32, y: i32 }
+
+ fn dist_sq(a: Point, b: Point) -> i32 {
+     let dx = a.x - b.x;
+     let dy = a.y - b.y;
+     dx * dx + dy * dy
+ }
+
+ fn classify(n: i32) -> *u8 {
+     match n {
+         0       => "zero",
+         1..10   => "single digit",
+         10 | 20 => "round number",
+         _       => "other",
+     }
+ }
+
+lineCommentToken //
+multiLineCommentTokens /* */
+printToken io::std_io_print
+stringToken "
+
+hasComments true
+ // A comment
+hasLineComments true
+ // A comment
+hasMultiLineComments true
+ /* A comment
+    spanning several lines */
+hasPrintDebugging true
+hasSemanticIndentation false
+hasStrings true
+ "Hello world"
+hasIntegers true
+hasFloats true
+hasHexadecimals true
+hasBinaryNumbers true
+hasOctals true
