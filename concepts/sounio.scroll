@@ -1,0 +1,55 @@
+../code/conceptPage.scroll
+
+id sounio
+name Sounio
+appeared 2025
+creators Demetrios Chiuratto Agourakis
+tags pl
+website https://souniolang.org
+description Sounio 3.0 (pre-release) is a self-hosted research language for scientific computing with physical units, epistemic uncertainty types and declared effects.
+fileExtensions sio
+writtenIn sounio
+oldName Demetrios
+docs https://souniolang.org
+spec https://github.com/Sounio-lang/sounio/blob/main/docs/spec/LANGUAGE_SPECIFICATION.md
+reference https://doi.org/10.5281/zenodo.18190065
+
+isOpenSource true
+fileType text
+
+example
+ fn main() -> i32 with IO {
+     println("Hello, Sounio")
+     return 0
+ }
+
+githubRepo https://github.com/Sounio-lang/sounio
+ created 2025
+
+lineCommentToken //
+printToken println
+stringToken "
+
+hasComments true
+hasLineComments true
+ // A comment
+hasUnitsOfMeasure true
+ let distance: m = 100.0
+ let time: s = 9.58
+ let velocity = distance / time
+hasPrintDebugging true
+hasStrings true
+ "Hello, Sounio"
+hasFloats true
+ 100.0
+hasIntegers true
+ 0
+hasTypeAnnotations true
+ let distance: m = 100.0
+hasStaticTyping true
+hasFunctions true
+ fn main() -> i32 with IO {
+     println("Hello, Sounio")
+     return 0
+ }
+hasStandardLibrary true
